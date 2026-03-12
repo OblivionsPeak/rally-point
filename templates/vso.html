@@ -1,0 +1,109 @@
+{% extends "base.html" %}
+{% block title %}Find a VSO — Rally Point{% endblock %}
+{% block content %}
+
+<div class="page-header">
+  <h1>Find a VSO</h1>
+  <p>Veterans Service Organizations provide free, accredited claims help. You should never pay for VA claims assistance.</p>
+</div>
+
+<!-- Zip locator -->
+<div class="card" style="margin-bottom:28px;">
+  <div class="card-title">Find Local VSO Offices Near You</div>
+  <p style="font-size:13px; color:var(--muted); margin-bottom:16px;">
+    Enter your zip code to search the VA's official directory of accredited VSO representatives in your area.
+  </p>
+  <form id="zipForm" style="display:flex; gap:10px; flex-wrap:wrap;">
+    <input type="text" id="zipInput" class="form-control" placeholder="Enter zip code"
+           pattern="[0-9]{5}" maxlength="5" style="max-width:200px;" required>
+    <button type="submit" class="btn btn-primary">Search Near Me</button>
+  </form>
+  <p style="font-size:12px; color:var(--muted); margin-top:10px;">
+    Opens the VA's official accredited representative search in a new tab.
+  </p>
+</div>
+
+<!-- What is a VSO -->
+<div class="card" style="margin-bottom:28px; border-color:var(--accent); background:rgba(59,130,246,0.05);">
+  <div class="card-title">What Does a VSO Do?</div>
+  <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:16px; font-size:13px; color:var(--muted); line-height:1.7;">
+    <div>
+      <strong style="color:var(--text); display:block; margin-bottom:4px;">Build Your Claim</strong>
+      Help you gather the right medical evidence, nexus letters, buddy statements, and service records before you file.
+    </div>
+    <div>
+      <strong style="color:var(--text); display:block; margin-bottom:4px;">File on Your Behalf</strong>
+      Submit claims, supplemental evidence, and appeals directly with the VA as your accredited representative.
+    </div>
+    <div>
+      <strong style="color:var(--text); display:block; margin-bottom:4px;">Fight Denials</strong>
+      Guide you through Supplemental Claims, Higher-Level Reviews, and Board of Veterans Appeals.
+    </div>
+    <div>
+      <strong style="color:var(--text); display:block; margin-bottom:4px;">Always Free</strong>
+      Federal law prohibits VSOs from charging for claims help. If someone asks for money, walk away.
+    </div>
+  </div>
+</div>
+
+<!-- National VSO directory -->
+<h2 style="font-size:18px; font-weight:700; margin-bottom:4px;">National VSO Directory</h2>
+<p style="font-size:13px; color:var(--muted); margin-bottom:20px;">
+  Pick the VSO that best fits your situation. You can work with more than one.
+</p>
+
+<div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(300px, 1fr)); gap:16px;">
+  {% for v in vsos %}
+  <div class="card" style="margin-bottom:0;">
+    <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:10px;">
+      <div>
+        <div style="font-weight:700; font-size:16px;">{{ v.abbr }}</div>
+        <div style="font-size:12px; color:var(--muted);">{{ v.name }}</div>
+      </div>
+      <a href="{{ v.website }}" target="_blank" rel="noopener"
+         class="btn btn-secondary btn-sm" style="white-space:nowrap; flex-shrink:0; margin-left:10px;">
+        Visit Site
+      </a>
+    </div>
+
+    <div style="display:inline-block; background:rgba(59,130,246,0.12); color:#93c5fd;
+                font-size:11px; font-weight:600; padding:2px 8px; border-radius:20px;
+                margin-bottom:10px;">
+      {{ v.tagline }}
+    </div>
+
+    <p style="font-size:13px; color:var(--muted); line-height:1.6; margin-bottom:12px;">
+      {{ v.description }}
+    </p>
+
+    <div style="font-size:12px; color:var(--muted); border-top:1px solid var(--border); padding-top:10px;">
+      <strong style="color:var(--text);">Phone:</strong>
+      <a href="tel:{{ v.phone }}" style="color:var(--muted);">{{ v.phone }}</a>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+
+<div class="card" style="margin-top:24px; border-color:var(--border);">
+  <p style="font-size:13px; color:var(--muted); line-height:1.7; margin:0;">
+    <strong style="color:var(--text);">State VSOs:</strong> Every U.S. state also has a State Department of Veterans Affairs with free claims agents.
+    Search for your state's veterans agency for additional local support.
+    &nbsp;·&nbsp;
+    <strong style="color:var(--text);">County VSOs:</strong> Many counties have their own veterans service officers as well — often the fastest to get an appointment with.
+  </p>
+</div>
+
+<script>
+  document.getElementById('zipForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const zip = document.getElementById('zipInput').value.trim();
+    if (zip.length === 5) {
+      window.open(
+        'https://www.va.gov/get-help-from-accredited-representative/?locationSearchQuery=' + encodeURIComponent(zip),
+        '_blank'
+      );
+    }
+  });
+</script>
+
+{% endblock %}
