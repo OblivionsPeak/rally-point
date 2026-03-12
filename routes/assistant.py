@@ -25,11 +25,14 @@ Important rules:
 def chat():
     message = request.json.get('message', '').strip()
     history = request.json.get('history', [])
+    context = request.json.get('context', '')  # optional extra context e.g. from C&P prep page
 
     if not message:
         return jsonify({'error': 'No message provided'}), 400
     if not ANTHROPIC_KEY:
-        return jsonify({'error': 'AI assistant not configured yet'}), 503
+        return jsonify({'error': 'AI assistant not configured yet. Add ANTHROPIC_API_KEY to Railway environment variables.'}), 503
+
+    system = SYSTEM_PROMPT + (f'\n\nAdditional context: {context}' if context else '')
 
     try:
         client = anthropic.Anthropic(api_key=ANTHROPIC_KEY)
@@ -37,7 +40,7 @@ def chat():
         response = client.messages.create(
             model='claude-sonnet-4-6',
             max_tokens=1024,
-            system=SYSTEM_PROMPT,
+            system=system,
             messages=messages,
         )
         reply = response.content[0].text

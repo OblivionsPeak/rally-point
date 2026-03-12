@@ -1,0 +1,134 @@
+{% extends "base.html" %}
+{% block title %}C&P Exam Prep — {{ claim.condition }} — Rally Point{% endblock %}
+{% block content %}
+
+<div style="margin-bottom:24px;">
+  <a href="/claims/{{ claim.id }}" style="font-size:13px; color:var(--muted);">← Back to {{ claim.condition }}</a>
+  <h1 style="font-size:26px; font-weight:700; margin-top:6px;">C&P Exam Prep</h1>
+  <p style="color:var(--muted); margin-top:4px;">{{ claim.condition }} — {{ claim.claim_type|replace('_',' ')|title }}</p>
+</div>
+
+<!-- Top warning banner -->
+<div style="background:#1a2332; border:1px solid #2d4a6b; border-radius:8px; padding:16px 20px; margin-bottom:28px; display:flex; gap:14px; align-items:flex-start;">
+  <div style="font-size:22px; margin-top:2px;">⚠️</div>
+  <div>
+    <div style="font-weight:600; margin-bottom:4px;">Describe your worst day — not your average day</div>
+    <div style="font-size:14px; color:var(--muted);">The VA rates your condition at its worst. Veterans are trained to minimize. At this exam, be completely honest about your hardest days — the days you can't function, not the days you push through.</div>
+  </div>
+</div>
+
+<div style="display:grid; grid-template-columns:1fr 1fr; gap:20px; align-items:start;">
+
+  <!-- Left column: tips -->
+  <div>
+
+    <!-- Condition-specific tips -->
+    {% if condition_tips %}
+    <div class="card" style="margin-bottom:16px;">
+      <div class="card-title" style="color:var(--accent);">Tips for {{ claim.condition }}</div>
+      <ul style="list-style:none; padding:0; display:flex; flex-direction:column; gap:12px;">
+        {% for tip in condition_tips %}
+        <li style="display:flex; gap:10px; font-size:14px;">
+          <span style="color:var(--accent); margin-top:2px; flex-shrink:0;">→</span>
+          <span>{{ tip }}</span>
+        </li>
+        {% endfor %}
+      </ul>
+    </div>
+    {% endif %}
+
+    <!-- General tips -->
+    <div class="card">
+      <div class="card-title">General C&P Rules</div>
+      <div style="display:flex; flex-direction:column; gap:16px;">
+        {% for tip in general_tips %}
+        <div style="padding-bottom:16px; border-bottom:1px solid var(--border);">
+          <div style="font-weight:600; font-size:14px; margin-bottom:4px;">{{ tip.heading }}</div>
+          <div style="font-size:13px; color:var(--muted); line-height:1.6;">{{ tip.body }}</div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Right column: AI practice assistant -->
+  <div>
+    <div class="card" style="position:sticky; top:72px;">
+      <div class="card-title">Practice with AI</div>
+      <p style="font-size:13px; color:var(--muted); margin-bottom:16px;">
+        Describe your {{ claim.condition }} symptoms here. The AI will help you frame them the way the VA needs to hear them — and flag anything you might be leaving out.
+      </p>
+
+      <div class="chat-container" id="chat" style="height:420px;">
+        <div class="chat-messages" id="chatMessages">
+          <div class="chat-msg assistant">
+            I'm here to help you prepare for your {{ claim.condition }} C&P exam. Start by describing your symptoms — how they affect your daily life, sleep, work, and relationships. I'll help you make sure you're describing them completely and accurately.
+          </div>
+        </div>
+        <div class="chat-input-row">
+          <input type="text" class="form-control" id="chatInput" placeholder="Describe your symptoms...">
+          <button class="btn btn-primary" onclick="sendMessage()">Send</button>
+        </div>
+      </div>
+
+      <p style="font-size:11px; color:var(--muted); margin-top:10px; text-align:center;">
+        Not legal advice. Always verify with a VSO before your exam.
+      </p>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const condition = {{ claim.condition | tojson }};
+const history = [];
+
+// Inject condition context into system so AI knows what we're prepping for
+const contextMsg = `The veteran is preparing for a C&P exam for: ${condition}. Help them describe their symptoms accurately and completely for VA rating purposes.`;
+
+async function sendMessage() {
+  const input = document.getElementById('chatInput');
+  const msg = input.value.trim();
+  if (!msg) return;
+
+  appendMsg(msg, 'user');
+  input.value = '';
+
+  const thinking = appendMsg('...', 'assistant');
+
+  try {
+    const res = await fetch('/api/assistant', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({
+        message: msg,
+        history,
+        context: contextMsg,
+      }),
+    });
+    const data = await res.json();
+    thinking.textContent = data.reply || data.error || 'Something went wrong.';
+    history.push({role: 'user', content: msg});
+    history.push({role: 'assistant', content: data.reply || ''});
+  } catch (e) {
+    thinking.textContent = 'Could not reach the assistant. Try again.';
+  }
+}
+
+function appendMsg(text, role) {
+  const box = document.getElementById('chatMessages');
+  const div = document.createElement('div');
+  div.className = `chat-msg ${role}`;
+  div.textContent = text;
+  box.appendChild(div);
+  box.scrollTop = box.scrollHeight;
+  return div;
+}
+
+document.getElementById('chatInput').addEventListener('keydown', e => {
+  if (e.key === 'Enter') sendMessage();
+});
+</script>
+
+{% endblock %}

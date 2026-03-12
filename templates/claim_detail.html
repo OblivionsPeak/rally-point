@@ -11,9 +11,12 @@
       {% if claim.rating %} · Rated <strong>{{ claim.rating }}%</strong>{% endif %}
     </div>
   </div>
-  <span class="badge badge-{{ 'review' if claim.status == 'in_review' else 'decided' if claim.status == 'decision_made' else 'closed' if claim.status == 'closed' else 'pending' }}" style="font-size:13px; padding:4px 14px;">
-    {{ claim.status|replace('_',' ')|title }}
-  </span>
+  <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+    <a href="/claims/{{ claim.id }}/cpep" class="btn btn-secondary">C&P Exam Prep</a>
+    <span class="badge badge-{{ 'review' if claim.status == 'in_review' else 'decided' if claim.status == 'decision_made' else 'closed' if claim.status == 'closed' else 'pending' }}" style="font-size:13px; padding:4px 14px;">
+      {{ claim.status|replace('_',' ')|title }}
+    </span>
+  </div>
 </div>
 
 <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px; align-items:start;">

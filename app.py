@@ -12,15 +12,17 @@ app = Flask(__name__)
 app.secret_key = SECRET_KEY
 
 # ── Auth routes ───────────────────────────────────────────────────────────────
-from routes.auth    import bp as auth_bp
+from routes.auth      import bp as auth_bp
 from routes.dashboard import bp as dashboard_bp
-from routes.claims  import bp as claims_bp
+from routes.claims    import bp as claims_bp
 from routes.assistant import bp as assistant_bp
+from routes.cpep      import bp as cpep_bp
 
 app.register_blueprint(auth_bp)
 app.register_blueprint(dashboard_bp)
 app.register_blueprint(claims_bp)
 app.register_blueprint(assistant_bp)
+app.register_blueprint(cpep_bp)
 
 
 @app.get('/')
