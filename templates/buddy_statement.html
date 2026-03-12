@@ -1,0 +1,240 @@
+{% extends "base.html" %}
+{% block title %}Buddy Statement Generator — Rally Point{% endblock %}
+{% block content %}
+
+<div style="max-width:760px; margin:0 auto;">
+
+  <a href="/dashboard" style="font-size:13px; color:var(--muted);">← Back to Dashboard</a>
+  <h1 style="font-size:26px; font-weight:700; margin-top:8px; margin-bottom:4px;">Buddy Statement Generator</h1>
+  <p style="font-size:14px; color:var(--muted); margin-bottom:28px;">
+    Fill in the fields below to generate a ready-to-print buddy statement (VA Form 21-4138 equivalent).
+    Share it with a fellow veteran, family member, or caregiver — they sign it and you submit it with your claim.
+  </p>
+
+  <!-- ── Input form ── -->
+  <div class="card" id="inputCard">
+    <div class="card-title">Statement Details</div>
+
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+
+      <div class="form-group">
+        <label style="font-size:13px; font-weight:600; display:block; margin-bottom:6px;">Veteran's full name <span style="color:var(--danger);">*</span></label>
+        <input id="vetName" type="text" class="form-control" placeholder="e.g. John A. Smith">
+      </div>
+
+      <div class="form-group">
+        <label style="font-size:13px; font-weight:600; display:block; margin-bottom:6px;">Veteran's VA file / SSN last 4 <span style="color:var(--danger);">*</span></label>
+        <input id="vetFile" type="text" class="form-control" placeholder="e.g. 1234 or XXX-XX-1234">
+      </div>
+
+      <div class="form-group">
+        <label style="font-size:13px; font-weight:600; display:block; margin-bottom:6px;">Author's full name <span style="color:var(--danger);">*</span></label>
+        <input id="authorName" type="text" class="form-control" placeholder="Person writing this statement">
+      </div>
+
+      <div class="form-group">
+        <label style="font-size:13px; font-weight:600; display:block; margin-bottom:6px;">Author's relationship to veteran <span style="color:var(--danger);">*</span></label>
+        <select id="authorRel" class="form-control">
+          <option value="">— select —</option>
+          <option value="fellow veteran who served with">fellow veteran who served with</option>
+          <option value="fellow service member who served alongside">fellow service member who served alongside</option>
+          <option value="spouse of">spouse of</option>
+          <option value="parent of">parent of</option>
+          <option value="sibling of">sibling of</option>
+          <option value="child of">child of</option>
+          <option value="close friend of">close friend of</option>
+          <option value="caregiver for">caregiver for</option>
+          <option value="coworker of">coworker of</option>
+          <option value="treating provider for">treating provider for</option>
+        </select>
+      </div>
+
+      <div class="form-group" style="grid-column:1/-1;">
+        <label style="font-size:13px; font-weight:600; display:block; margin-bottom:6px;">Condition or disability being claimed <span style="color:var(--danger);">*</span></label>
+        <input id="condition" type="text" class="form-control" placeholder="e.g. PTSD, lower back injury, sleep apnea">
+      </div>
+
+      <div class="form-group" style="grid-column:1/-1;">
+        <label style="font-size:13px; font-weight:600; display:block; margin-bottom:6px;">What did the author personally witness or observe? <span style="color:var(--danger);">*</span></label>
+        <textarea id="witnessed" class="form-control" rows="4" placeholder="Describe the specific incident, event, or ongoing symptoms the author directly witnessed. Be specific — dates, locations, and concrete observations carry more weight than general statements."></textarea>
+      </div>
+
+      <div class="form-group" style="grid-column:1/-1;">
+        <label style="font-size:13px; font-weight:600; display:block; margin-bottom:6px;">How has this condition affected the veteran's daily life?</label>
+        <textarea id="impact" class="form-control" rows="3" placeholder="e.g. Has difficulty sleeping, avoids crowds, unable to lift objects over 10 lbs, misses work frequently…"></textarea>
+      </div>
+
+      <div class="form-group">
+        <label style="font-size:13px; font-weight:600; display:block; margin-bottom:6px;">Author's phone number</label>
+        <input id="authorPhone" type="text" class="form-control" placeholder="e.g. (555) 867-5309">
+      </div>
+
+      <div class="form-group">
+        <label style="font-size:13px; font-weight:600; display:block; margin-bottom:6px;">Author's email address</label>
+        <input id="authorEmail" type="text" class="form-control" placeholder="e.g. jane@example.com">
+      </div>
+
+    </div>
+
+    <div style="margin-top:20px; display:flex; gap:10px; flex-wrap:wrap;">
+      <button onclick="generateStatement()" class="btn btn-primary">Generate Statement</button>
+      <button onclick="clearForm()" class="btn btn-secondary">Clear</button>
+    </div>
+
+    <p id="errorMsg" style="color:var(--danger); font-size:13px; margin-top:10px; display:none;"></p>
+  </div>
+
+  <!-- ── Preview / Print output ── -->
+  <div id="previewCard" style="display:none; margin-top:24px;">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; flex-wrap:wrap; gap:10px;">
+      <div style="font-size:15px; font-weight:700;">Preview</div>
+      <div style="display:flex; gap:10px;">
+        <button onclick="window.print()" class="btn btn-primary">Print / Save as PDF</button>
+        <button onclick="document.getElementById('previewCard').style.display='none'" class="btn btn-secondary">Edit</button>
+      </div>
+    </div>
+
+    <!-- Print area -->
+    <div id="printArea" style="background:#fff; color:#111; border:1px solid var(--border); border-radius:8px; padding:40px 48px; font-family:Georgia, serif; font-size:14px; line-height:1.8;">
+
+      <div style="text-align:center; margin-bottom:30px;">
+        <div style="font-size:11px; letter-spacing:1px; text-transform:uppercase; color:#555;">VA Form 21-4138 — Personal Statement in Support of Claim</div>
+        <div style="font-size:11px; color:#555; margin-top:4px;">This statement supplements the official VA form. Attach to completed VA Form 21-4138.</div>
+      </div>
+
+      <div style="border-bottom:2px solid #333; padding-bottom:10px; margin-bottom:20px;">
+        <div><strong>Veteran:</strong> <span id="out_vetName"></span></div>
+        <div><strong>VA File / SSN:</strong> <span id="out_vetFile"></span></div>
+        <div><strong>Condition:</strong> <span id="out_condition"></span></div>
+      </div>
+
+      <div id="out_body" style="margin-bottom:30px; white-space:pre-wrap;"></div>
+
+      <div style="margin-top:40px; border-top:1px solid #999; padding-top:20px;">
+        <div style="font-size:13px; margin-bottom:20px;">
+          I certify that the statements on this form are true and correct to the best of my knowledge and belief.
+        </div>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:30px; margin-top:10px;">
+          <div>
+            <div style="border-bottom:1px solid #333; height:40px;"></div>
+            <div style="font-size:12px; margin-top:4px;">Signature of person making statement</div>
+          </div>
+          <div>
+            <div style="border-bottom:1px solid #333; height:40px;"></div>
+            <div style="font-size:12px; margin-top:4px;">Date</div>
+          </div>
+        </div>
+
+        <div style="margin-top:20px;">
+          <div><strong>Printed name:</strong> <span id="out_authorName"></span></div>
+          <div id="out_contactLine" style="margin-top:4px;"></div>
+        </div>
+      </div>
+
+      <div style="margin-top:28px; background:#f5f5f5; border:1px solid #ddd; border-radius:6px; padding:12px; font-size:11px; color:#555;">
+        <strong>Penalty statement:</strong> The law provides severe penalties which include fine or imprisonment, or both, for the willful submission of any statement or evidence of a material fact, knowing it to be false.
+      </div>
+
+    </div>
+
+    <p style="font-size:12px; color:var(--muted); margin-top:12px;">
+      Tip: Use your browser's Print dialog → "Save as PDF" to create a file. The author should sign the printed copy, then scan or photograph it to attach to the VA claim.
+    </p>
+  </div>
+
+  <!-- ── Tips ── -->
+  <div class="card" style="margin-top:24px;">
+    <div class="card-title">Tips for a strong buddy statement</div>
+    <ul style="font-size:14px; color:var(--muted); line-height:2; padding-left:20px; margin:0;">
+      <li><strong>Be specific.</strong> Include dates, locations, unit names, and exact events where possible.</li>
+      <li><strong>First-hand only.</strong> The author should only describe what they personally saw or experienced — not what someone else told them.</li>
+      <li><strong>Connect to the condition.</strong> Explicitly link the witnessed event or behavior to the claimed disability.</li>
+      <li><strong>Describe current impact.</strong> VA raters want to understand how the condition affects daily life, work, and relationships today.</li>
+      <li><strong>Keep it factual.</strong> Avoid emotional language or exaggeration — credibility matters more than sympathy.</li>
+      <li><strong>Attach to VA Form 21-4138.</strong> The author should complete an official VA Form 21-4138 (Personal Statement in Support of Claim) and attach this document as a continuation sheet.</li>
+    </ul>
+  </div>
+
+</div>
+
+<style>
+  @media print {
+    body * { visibility: hidden !important; }
+    #printArea, #printArea * { visibility: visible !important; }
+    #printArea {
+      position: fixed !important;
+      top: 0 !important;
+      left: 0 !important;
+      width: 100% !important;
+      border: none !important;
+      padding: 30px 48px !important;
+    }
+  }
+</style>
+
+<script>
+function generateStatement() {
+  const vetName    = document.getElementById('vetName').value.trim();
+  const vetFile    = document.getElementById('vetFile').value.trim();
+  const authorName = document.getElementById('authorName').value.trim();
+  const authorRel  = document.getElementById('authorRel').value;
+  const condition  = document.getElementById('condition').value.trim();
+  const witnessed  = document.getElementById('witnessed').value.trim();
+  const impact     = document.getElementById('impact').value.trim();
+  const phone      = document.getElementById('authorPhone').value.trim();
+  const email      = document.getElementById('authorEmail').value.trim();
+
+  const errEl = document.getElementById('errorMsg');
+
+  if (!vetName || !vetFile || !authorName || !authorRel || !condition || !witnessed) {
+    errEl.textContent = 'Please fill in all required fields (marked with *).';
+    errEl.style.display = 'block';
+    return;
+  }
+  errEl.style.display = 'none';
+
+  const today = new Date().toLocaleDateString('en-US', { year:'numeric', month:'long', day:'numeric' });
+
+  let body = `I, ${authorName}, am a ${authorRel} ${vetName}. I am providing this statement in support of ${vetName}'s claim for service-connected disability related to ${condition}.\n\n`;
+
+  body += `PERSONAL OBSERVATION:\n${witnessed}\n`;
+
+  if (impact) {
+    body += `\nIMPACT ON DAILY LIFE:\n${impact}\n`;
+  }
+
+  body += `\nI am willing to testify to the accuracy of this statement and can be contacted to provide further information if needed.`;
+
+  // Populate output
+  document.getElementById('out_vetName').textContent   = vetName;
+  document.getElementById('out_vetFile').textContent   = vetFile;
+  document.getElementById('out_condition').textContent = condition;
+  document.getElementById('out_body').textContent      = body;
+  document.getElementById('out_authorName').textContent = authorName;
+
+  const contactParts = [];
+  if (phone) contactParts.push(phone);
+  if (email) contactParts.push(email);
+  const contactEl = document.getElementById('out_contactLine');
+  if (contactParts.length) {
+    contactEl.innerHTML = '<strong>Contact:</strong> ' + contactParts.join(' · ');
+  } else {
+    contactEl.textContent = '';
+  }
+
+  document.getElementById('previewCard').style.display = 'block';
+  document.getElementById('previewCard').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function clearForm() {
+  ['vetName','vetFile','authorName','condition','witnessed','impact','authorPhone','authorEmail'].forEach(id => {
+    document.getElementById(id).value = '';
+  });
+  document.getElementById('authorRel').value = '';
+  document.getElementById('previewCard').style.display = 'none';
+  document.getElementById('errorMsg').style.display = 'none';
+}
+</script>
+
+{% endblock %}
