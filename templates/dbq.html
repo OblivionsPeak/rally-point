@@ -1,0 +1,128 @@
+{% extends "base.html" %}
+{% block title %}DBQ Reference Guide — Rally Point{% endblock %}
+{% block content %}
+
+<div style="max-width:860px; margin:0 auto;">
+
+  <a href="/dashboard" style="font-size:13px; color:var(--muted);">← Back to Dashboard</a>
+  <h1 style="font-size:26px; font-weight:700; margin-top:8px; margin-bottom:4px;">DBQ Reference Guide</h1>
+  <p style="font-size:14px; color:var(--muted); margin-bottom:28px;">
+    Find the right Disability Benefits Questionnaire for your condition and bring it to your doctor appointment.
+  </p>
+
+  <!-- What is a DBQ -->
+  <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(220px, 1fr)); gap:14px; margin-bottom:28px;">
+    <div style="background:#1a2332; border:1px solid #2d4a6b; border-radius:8px; padding:16px;">
+      <div style="font-weight:600; font-size:14px; margin-bottom:6px;">What is a DBQ?</div>
+      <div style="font-size:13px; color:var(--muted); line-height:1.7;">A VA form that structures a medical opinion exactly the way raters read it. VA raters use DBQs to assign ratings — a private doctor filling one out carries the same weight as a C&P exam.</div>
+    </div>
+    <div style="background:#1a2332; border:1px solid #2d4a6b; border-radius:8px; padding:16px;">
+      <div style="font-weight:600; font-size:14px; margin-bottom:6px;">Why use a private DBQ?</div>
+      <div style="font-size:13px; color:var(--muted); line-height:1.7;">VA C&P examiners are often rushed and incentivized to minimize. Your own treating physician knows your worst days. A private DBQ submitted as evidence can result in a higher rating than the VA's own exam.</div>
+    </div>
+    <div style="background:#1a2332; border:1px solid #2d4a6b; border-radius:8px; padding:16px;">
+      <div style="font-weight:600; font-size:14px; margin-bottom:6px;">How to use this guide</div>
+      <div style="font-size:13px; color:var(--muted); line-height:1.7;">Find your condition below, note the DBQ name, then search for it on VA.gov or ask your VSO to print it. Bring the blank form to your doctor and ask them to complete it.</div>
+    </div>
+    <div style="background:#1a2332; border:1px solid #2d4a6b; border-radius:8px; padding:16px;">
+      <div style="font-weight:600; font-size:14px; margin-bottom:6px;">Range of motion is critical</div>
+      <div style="font-size:13px; color:var(--muted); line-height:1.7;">For musculoskeletal conditions, the doctor must measure and record range of motion. Emphasize your <strong style="color:var(--text);">worst days</strong> — the VA rates based on the worst presentation, not average.</div>
+    </div>
+  </div>
+
+  <!-- Search -->
+  <div style="margin-bottom:20px;">
+    <input type="text" id="dbqSearch" class="form-control" placeholder="Search by condition (e.g. PTSD, knee, sleep apnea…)" oninput="filterDBQs()" style="max-width:440px;">
+  </div>
+
+  <!-- Category filter pills -->
+  <div style="display:flex; flex-wrap:wrap; gap:8px; margin-bottom:24px;" id="categoryPills">
+    <button class="pill active" onclick="setCategory('all', this)">All</button>
+    {% for cat in categories %}
+    <button class="pill" onclick="setCategory('{{ cat }}', this)">{{ cat }}</button>
+    {% endfor %}
+  </div>
+
+  <!-- DBQ table -->
+  <div id="dbqList" style="display:flex; flex-direction:column; gap:10px;">
+    {% for d in dbqs %}
+    <div class="dbq-row card"
+         data-category="{{ d.category }}"
+         data-keywords="{{ d.condition|lower }} {{ d.keywords|join(' ') }}"
+         style="padding:14px 18px;">
+      <div style="display:grid; grid-template-columns:1fr auto; gap:12px; align-items:start;">
+        <div>
+          <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-bottom:4px;">
+            <span style="font-weight:600; font-size:14px;">{{ d.condition }}</span>
+            <span style="font-size:11px; color:var(--muted); background:var(--bg); border:1px solid var(--border); border-radius:20px; padding:2px 8px;">{{ d.category }}</span>
+          </div>
+          <div style="font-size:13px; color:var(--accent); margin-bottom:5px;">{{ d.dbq }}</div>
+          <div style="font-size:13px; color:var(--muted); line-height:1.6;">{{ d.notes }}</div>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+  <div id="noResults" style="display:none; text-align:center; padding:40px; color:var(--muted); font-size:14px;">
+    No DBQs found for that search. Try a different term or <a href="/assistant">ask the AI assistant</a>.
+  </div>
+
+  <!-- How to get DBQs -->
+  <div class="card" style="margin-top:32px;">
+    <div class="card-title">How to get blank DBQ forms</div>
+    <ol style="font-size:14px; color:var(--muted); line-height:2.2; padding-left:20px; margin:0;">
+      <li>Search <strong style="color:var(--text);">va.gov/disability/how-to-file-claim/forms</strong> for the DBQ name above, or ask your VSO — they have them all.</li>
+      <li>Print the blank form and bring it to your doctor appointment.</li>
+      <li>Ask your doctor to complete it based on your current diagnosis and examination findings.</li>
+      <li>Make sure the doctor <strong style="color:var(--text);">signs and dates</strong> the form and includes their credentials and contact info.</li>
+      <li>Submit the completed DBQ as evidence with your VA claim or as a supplemental document to an appeal.</li>
+    </ol>
+    <div style="margin-top:16px; padding:12px 14px; background:var(--bg); border:1px solid var(--border); border-radius:6px; font-size:13px; color:var(--muted);">
+      <strong style="color:var(--text);">Tip:</strong> If you're preparing for a VA C&P exam, having a private DBQ already completed by your treating physician gives the rater a second, often more favorable, medical opinion they must consider.
+    </div>
+  </div>
+
+</div>
+
+<style>
+.pill {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 5px 14px;
+  font-size: 13px;
+  color: var(--muted);
+  cursor: pointer;
+  font-family: inherit;
+}
+.pill:hover { color: var(--text); border-color: var(--accent); }
+.pill.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+</style>
+
+<script>
+let activeCategory = 'all';
+
+function filterDBQs() {
+  const query = document.getElementById('dbqSearch').value.toLowerCase().trim();
+  const rows  = document.querySelectorAll('.dbq-row');
+  let visible = 0;
+  rows.forEach(row => {
+    const matchCat = activeCategory === 'all' || row.dataset.category === activeCategory;
+    const matchQ   = !query || row.dataset.keywords.includes(query);
+    const show     = matchCat && matchQ;
+    row.style.display = show ? '' : 'none';
+    if (show) visible++;
+  });
+  document.getElementById('noResults').style.display = visible === 0 ? 'block' : 'none';
+}
+
+function setCategory(cat, btn) {
+  activeCategory = cat;
+  document.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
+  btn.classList.add('active');
+  filterDBQs();
+}
+</script>
+
+{% endblock %}
