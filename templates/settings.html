@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+{% block title %}Settings — Rally Point{% endblock %}
+{% block content %}
+<div class="page-header">
+  <h1>Account Settings</h1>
+  <p>{{ email }}</p>
+</div>
+
+<div style="max-width:560px; display:flex; flex-direction:column; gap:20px;">
+
+  <!-- Profile -->
+  <div class="card">
+    <div class="card-title">Service Profile</div>
+    <form method="POST" action="/settings/profile">
+      <div class="form-group">
+        <label class="form-label">Branch of Service</label>
+        <select name="branch" class="form-control">
+          <option value="">Select branch</option>
+          {% for val, label in [('army','Army'),('navy','Navy'),('marines','Marine Corps'),('air_force','Air Force'),('space_force','Space Force'),('coast_guard','Coast Guard'),('national_guard','National Guard'),('reserves','Reserves')] %}
+          <option value="{{ val }}" {{ 'selected' if profile.branch == val }}>{{ label }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Discharge Type</label>
+        <select name="discharge_type" class="form-control">
+          <option value="">Select discharge</option>
+          {% for val, label in [('honorable','Honorable'),('general','General (Under Honorable)'),('oth','Other Than Honorable'),('bad_conduct','Bad Conduct'),('dishonorable','Dishonorable'),('still_serving','Still Serving')] %}
+          <option value="{{ val }}" {{ 'selected' if profile.discharge_type == val }}>{{ label }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+        <div class="form-group">
+          <label class="form-label">Service Start</label>
+          <input type="date" name="service_start" class="form-control" value="{{ profile.service_start or '' }}">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Service End</label>
+          <input type="date" name="service_end" class="form-control" value="{{ profile.service_end or '' }}">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Current VA Rating</label>
+        <select name="current_rating" class="form-control">
+          <option value="">Not rated yet</option>
+          {% for r in [0,10,20,30,40,50,60,70,80,90,100] %}
+          <option value="{{ r }}" {{ 'selected' if profile.current_rating == r }}>{{ r }}%</option>
+          {% endfor %}
+        </select>
+      </div>
+      <button type="submit" class="btn btn-primary">Save Profile</button>
+    </form>
+  </div>
+
+  <!-- Password -->
+  <div class="card">
+    <div class="card-title">Change Password</div>
+    <form method="POST" action="/settings/password">
+      <div class="form-group">
+        <label class="form-label">New Password</label>
+        <input type="password" name="new_password" class="form-control" minlength="8" required>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Confirm New Password</label>
+        <input type="password" name="confirm_password" class="form-control" required>
+      </div>
+      <button type="submit" class="btn btn-secondary">Update Password</button>
+    </form>
+  </div>
+
+  <!-- Delete account -->
+  <div class="card" style="border-color:var(--danger);">
+    <div class="card-title" style="color:var(--danger);">Delete Account</div>
+    <p style="font-size:13px; color:var(--muted); margin-bottom:16px;">
+      Permanently deletes your account and all claim data. This cannot be undone.
+    </p>
+    <form method="POST" action="/settings/delete" onsubmit="return confirm('Are you sure? This will permanently delete your account and all your claim data.')">
+      <button type="submit" class="btn" style="background:var(--danger); color:#fff;">Delete My Account</button>
+    </form>
+  </div>
+
+</div>
+{% endblock %}
