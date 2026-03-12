@@ -158,6 +158,35 @@
 </div>
 {% endif %}
 
+<!-- Journal -->
+<div class="card" style="margin-top:16px;">
+  <div class="card-title">Journal</div>
+  <p style="font-size:13px; color:var(--muted); margin-bottom:14px;">Log phone calls, exam dates, conversations with VA, or anything worth remembering about this claim.</p>
+
+  <form method="POST" action="/claims/{{ claim.id }}/notes" style="display:flex; gap:8px; margin-bottom:18px;">
+    <input type="text" name="content" class="form-control" placeholder="e.g. Called VA 1-800 — rep said claim in review, expect decision in 30 days" required style="flex:1;">
+    <button type="submit" class="btn btn-secondary btn-sm" style="white-space:nowrap;">+ Add Note</button>
+  </form>
+
+  {% if notes %}
+  <ul style="list-style:none; padding:0; margin:0; display:flex; flex-direction:column; gap:10px;">
+    {% for note in notes %}
+    <li style="display:flex; justify-content:space-between; align-items:flex-start; gap:10px; padding:10px 12px; background:var(--bg); border:1px solid var(--border); border-radius:6px;">
+      <div>
+        <div style="font-size:13px;">{{ note.content }}</div>
+        <div style="font-size:11px; color:var(--muted); margin-top:4px;">{{ note.created_at[:10] }} at {{ note.created_at[11:16] }} UTC</div>
+      </div>
+      <form method="POST" action="/claims/{{ claim.id }}/notes/{{ note.id }}/delete" style="flex-shrink:0;">
+        <button type="submit" style="background:none; border:none; color:var(--muted); cursor:pointer; font-size:16px; padding:0; line-height:1;" title="Delete note">×</button>
+      </form>
+    </li>
+    {% endfor %}
+  </ul>
+  {% else %}
+  <p style="font-size:13px; color:var(--muted);">No notes yet.</p>
+  {% endif %}
+</div>
+
 {% if secondaries %}
 <div style="margin-top:28px;">
   <h2 style="font-size:18px; font-weight:700; margin-bottom:4px;">Related Conditions You May Be Entitled To</h2>

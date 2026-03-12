@@ -45,9 +45,10 @@ def view_claim(claim_id):
     docs       = svc_client.table('documents').select('*').eq('claim_id', claim_id).order('created_at').execute()
     secondaries  = get_secondaries(claim.data['condition'])
     claim_data   = _add_deadline(claim.data)
+    notes        = svc_client.table('claim_notes').select('*').eq('claim_id', claim_id).order('created_at', desc=True).execute()
     docs_data    = docs.data or []
     suggestions  = get_suggestions(claim.data['condition']) if not docs_data else []
-    return render_template('claim_detail.html', claim=claim_data, events=events.data or [], docs=docs_data, secondaries=secondaries, suggestions=suggestions)
+    return render_template('claim_detail.html', claim=claim_data, events=events.data or [], docs=docs_data, secondaries=secondaries, suggestions=suggestions, notes=notes.data or [])
 
 
 @bp.post('/claims/<claim_id>/status')
@@ -110,6 +111,28 @@ def toggle_doc(claim_id, doc_id):
     if doc.data:
         svc_client.table('documents').update({'collected': not doc.data['collected']}).eq('id', doc_id).execute()
         _touch_claim(claim_id, user_id)
+    return redirect(url_for('claims.view_claim', claim_id=claim_id))
+
+
+@bp.post('/claims/<claim_id>/notes')
+@login_required
+def add_note(claim_id):
+    user_id = session['user']['id']
+    content = request.form.get('content', '').strip()
+    if content:
+        svc_client.table('claim_notes').insert({
+            'claim_id': claim_id,
+            'user_id':  user_id,
+            'content':  content,
+        }).execute()
+    return redirect(url_for('claims.view_claim', claim_id=claim_id))
+
+
+@bp.post('/claims/<claim_id>/notes/<note_id>/delete')
+@login_required
+def delete_note(claim_id, note_id):
+    user_id = session['user']['id']
+    svc_client.table('claim_notes').delete().eq('id', note_id).eq('user_id', user_id).execute()
     return redirect(url_for('claims.view_claim', claim_id=claim_id))
 
 
