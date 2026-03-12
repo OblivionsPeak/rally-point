@@ -4,6 +4,7 @@ from flask import Blueprint, render_template, request, redirect, url_for, sessio
 from supabase_client import svc_client
 from routes.dashboard import login_required, _add_deadline
 from data.secondaries import get_secondaries
+from data.evidence_templates import get_suggestions
 
 bp = Blueprint('claims', __name__)
 
@@ -42,9 +43,11 @@ def view_claim(claim_id):
         return redirect(url_for('dashboard.home'))
     events     = svc_client.table('claim_events').select('*').eq('claim_id', claim_id).order('created_at').execute()
     docs       = svc_client.table('documents').select('*').eq('claim_id', claim_id).order('created_at').execute()
-    secondaries = get_secondaries(claim.data['condition'])
-    claim_data  = _add_deadline(claim.data)
-    return render_template('claim_detail.html', claim=claim_data, events=events.data or [], docs=docs.data or [], secondaries=secondaries)
+    secondaries  = get_secondaries(claim.data['condition'])
+    claim_data   = _add_deadline(claim.data)
+    docs_data    = docs.data or []
+    suggestions  = get_suggestions(claim.data['condition']) if not docs_data else []
+    return render_template('claim_detail.html', claim=claim_data, events=events.data or [], docs=docs_data, secondaries=secondaries, suggestions=suggestions)
 
 
 @bp.post('/claims/<claim_id>/status')
@@ -84,6 +87,18 @@ def add_doc(claim_id):
         'collected': False,
     }).execute()
     _touch_claim(claim_id, user_id)
+    return redirect(url_for('claims.view_claim', claim_id=claim_id))
+
+
+@bp.post('/claims/<claim_id>/docs/bulk')
+@login_required
+def add_docs_bulk(claim_id):
+    user_id = session['user']['id']
+    names = request.form.getlist('names')
+    rows  = [{'claim_id': claim_id, 'name': n.strip(), 'collected': False} for n in names if n.strip()]
+    if rows:
+        svc_client.table('documents').insert(rows).execute()
+        _touch_claim(claim_id, user_id)
     return redirect(url_for('claims.view_claim', claim_id=claim_id))
 
 

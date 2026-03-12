@@ -104,6 +104,30 @@
     <p style="font-size:13px; color:var(--muted); margin-bottom:14px;">
       Track the documents you need to gather. Check them off as you collect them.
     </p>
+
+    {% if suggestions %}
+    <div style="background:var(--bg); border:1px solid var(--border); border-radius:6px; padding:14px; margin-bottom:16px;">
+      <div style="font-size:13px; font-weight:600; margin-bottom:10px; color:var(--text);">Suggested evidence for {{ claim.condition }}</div>
+      <div style="display:flex; flex-direction:column; gap:6px;" id="suggestionList">
+        {% for s in suggestions %}
+        <div style="display:flex; justify-content:space-between; align-items:center; gap:8px;">
+          <span style="font-size:13px; color:var(--muted);">{{ s }}</span>
+          <form method="POST" action="/claims/{{ claim.id }}/docs" style="flex-shrink:0;">
+            <input type="hidden" name="name" value="{{ s }}">
+            <button type="submit" class="btn btn-secondary btn-sm">+ Add</button>
+          </form>
+        </div>
+        {% endfor %}
+      </div>
+      <form method="POST" action="/claims/{{ claim.id }}/docs/bulk" style="margin-top:12px;">
+        {% for s in suggestions %}
+        <input type="hidden" name="names" value="{{ s }}">
+        {% endfor %}
+        <button type="submit" class="btn btn-primary btn-sm" style="width:100%;">Add All to Checklist</button>
+      </form>
+    </div>
+    {% endif %}
+
     {% if docs %}
     <ul class="checklist">
       {% for doc in docs %}
