@@ -1,0 +1,261 @@
+{% extends "base.html" %}
+{% block title %}Nexus Letter Generator — Rally Point{% endblock %}
+{% block content %}
+
+<div style="max-width:780px; margin:0 auto;">
+
+  <a href="/dashboard" style="font-size:13px; color:var(--muted);">← Back to Dashboard</a>
+  <h1 style="font-size:26px; font-weight:700; margin-top:8px; margin-bottom:4px;">Nexus Letter Generator</h1>
+  <p style="font-size:14px; color:var(--muted); margin-bottom:28px;">
+    Fill in the details below to generate a letter you can hand to your doctor.
+    It explains what a nexus letter is, what the VA requires, and exactly what language to use.
+  </p>
+
+  <!-- ── What is a nexus letter ── -->
+  <div style="background:#1a2332; border:1px solid #2d4a6b; border-radius:8px; padding:16px 20px; margin-bottom:28px; display:flex; gap:14px; align-items:flex-start;">
+    <div style="font-size:20px; margin-top:2px; flex-shrink:0;">📋</div>
+    <div style="font-size:14px; color:var(--muted); line-height:1.7;">
+      <strong style="color:var(--text);">What is a nexus letter?</strong> It's a medical opinion from a treating physician or specialist stating that your condition is
+      <em>at least as likely as not</em> (50%+ probability) connected to your military service. Without it, VA often denies claims as "not service-connected" even when the connection is obvious.
+      Most doctors have never written one — this letter tells them exactly what to write.
+    </div>
+  </div>
+
+  <!-- ── Input form ── -->
+  <div class="card" id="inputCard">
+    <div class="card-title">Letter Details</div>
+
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+
+      <div class="form-group">
+        <label style="font-size:13px; font-weight:600; display:block; margin-bottom:6px;">Your full name <span style="color:var(--danger);">*</span></label>
+        <input id="vetName" type="text" class="form-control" placeholder="e.g. John A. Smith">
+      </div>
+
+      <div class="form-group">
+        <label style="font-size:13px; font-weight:600; display:block; margin-bottom:6px;">Your VA file / SSN last 4 <span style="color:var(--danger);">*</span></label>
+        <input id="vetFile" type="text" class="form-control" placeholder="e.g. 1234 or XXX-XX-1234">
+      </div>
+
+      <div class="form-group" style="grid-column:1/-1;">
+        <label style="font-size:13px; font-weight:600; display:block; margin-bottom:6px;">Condition you are claiming <span style="color:var(--danger);">*</span></label>
+        <input id="condition" type="text" class="form-control" placeholder="e.g. lumbar degenerative disc disease, major depressive disorder, hypertension">
+      </div>
+
+      <div class="form-group" style="grid-column:1/-1;">
+        <label style="font-size:13px; font-weight:600; display:block; margin-bottom:6px;">Type of service connection <span style="color:var(--danger);">*</span></label>
+        <select id="connType" class="form-control" onchange="toggleSecondaryField()">
+          <option value="">— select —</option>
+          <option value="direct">Direct — caused directly by military service (injury, exposure, event)</option>
+          <option value="secondary">Secondary — caused or worsened by another service-connected condition</option>
+          <option value="aggravation">Aggravation — pre-existing condition worsened beyond its natural progression by service</option>
+        </select>
+      </div>
+
+      <div class="form-group" style="grid-column:1/-1;" id="primaryConditionRow" style="display:none;">
+        <label style="font-size:13px; font-weight:600; display:block; margin-bottom:6px;">Primary service-connected condition <span style="color:var(--danger);">*</span></label>
+        <input id="primaryCondition" type="text" class="form-control" placeholder="e.g. PTSD (already rated 70% service-connected)">
+        <div style="font-size:12px; color:var(--muted); margin-top:5px;">The already-rated condition that caused or contributed to the one above.</div>
+      </div>
+
+      <div class="form-group" style="grid-column:1/-1;">
+        <label style="font-size:13px; font-weight:600; display:block; margin-bottom:6px;">In-service event, injury, or exposure <span style="color:var(--danger);">*</span></label>
+        <textarea id="inServiceEvent" class="form-control" rows="3" placeholder="Describe what happened in service: e.g. carried 60+ lb ruck on daily patrols for 3 years, IED blast in 2007, burn pit exposure at FOB [name], MOS as 11B infantry…"></textarea>
+        <div style="font-size:12px; color:var(--muted); margin-top:5px;">The doctor will reference this as the basis for the service connection opinion.</div>
+      </div>
+
+      <div class="form-group">
+        <label style="font-size:13px; font-weight:600; display:block; margin-bottom:6px;">Doctor's name (optional)</label>
+        <input id="drName" type="text" class="form-control" placeholder="e.g. Dr. Sarah Johnson, MD">
+      </div>
+
+      <div class="form-group">
+        <label style="font-size:13px; font-weight:600; display:block; margin-bottom:6px;">Doctor's specialty (optional)</label>
+        <input id="drSpecialty" type="text" class="form-control" placeholder="e.g. orthopedic surgeon, psychiatrist">
+      </div>
+
+    </div>
+
+    <div style="margin-top:20px; display:flex; gap:10px; flex-wrap:wrap;">
+      <button onclick="generateLetter()" class="btn btn-primary">Generate Letter</button>
+      <button onclick="clearForm()" class="btn btn-secondary">Clear</button>
+    </div>
+
+    <p id="errorMsg" style="color:var(--danger); font-size:13px; margin-top:10px; display:none;"></p>
+  </div>
+
+  <!-- ── Preview / Print output ── -->
+  <div id="previewCard" style="display:none; margin-top:24px;">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; flex-wrap:wrap; gap:10px;">
+      <div style="font-size:15px; font-weight:700;">Preview</div>
+      <div style="display:flex; gap:10px;">
+        <button onclick="window.print()" class="btn btn-primary">Print / Save as PDF</button>
+        <button onclick="document.getElementById('previewCard').style.display='none'" class="btn btn-secondary">Edit</button>
+      </div>
+    </div>
+
+    <div id="printArea" style="background:#fff; color:#111; border:1px solid var(--border); border-radius:8px; padding:40px 52px; font-family:Georgia, serif; font-size:14px; line-height:1.8;">
+
+      <div style="text-align:right; color:#555; font-size:13px; margin-bottom:32px;" id="out_date"></div>
+
+      <div style="margin-bottom:20px;" id="out_drAddress"></div>
+
+      <div style="margin-bottom:24px; font-weight:600;" id="out_re"></div>
+
+      <div id="out_body" style="white-space:pre-wrap;"></div>
+
+      <div style="margin-top:36px; border-top:1px solid #ccc; padding-top:20px; font-size:13px; color:#555;">
+        <strong style="color:#111;">Required VA language</strong> — the opinion must include one of the following phrases:
+        <ul style="margin-top:8px; line-height:2;">
+          <li><em>"It is at least as likely as not…"</em> (50%+ — meets VA threshold)</li>
+          <li><em>"It is more likely than not…"</em> (51%+ — stronger)</li>
+          <li><em>"It is highly likely…"</em> (even stronger)</li>
+        </ul>
+        The opinion must also include a <strong>rationale</strong> — a brief explanation of why the doctor reached that conclusion. An opinion without rationale will be rejected.
+      </div>
+
+    </div>
+
+    <p style="font-size:12px; color:var(--muted); margin-top:12px;">
+      Print this letter and bring it to your next appointment. Ask the doctor to write their opinion on their letterhead and sign it. Then submit it as evidence with your VA claim or appeal.
+    </p>
+  </div>
+
+  <!-- ── Tips ── -->
+  <div class="card" style="margin-top:24px;">
+    <div class="card-title">Tips for getting a strong nexus letter</div>
+    <ul style="font-size:14px; color:var(--muted); line-height:2.1; padding-left:20px; margin:0;">
+      <li><strong>Your treating physician is best.</strong> A doctor who has treated you long-term is more credible than a one-time evaluator.</li>
+      <li><strong>Specialists carry more weight.</strong> An orthopedic surgeon's opinion on a back injury outweighs a GP's.</li>
+      <li><strong>The magic phrase is "at least as likely as not."</strong> The VA only needs 50% probability — not certainty. Make sure your doctor uses that exact language.</li>
+      <li><strong>Rationale is required.</strong> The opinion must explain <em>why</em> the doctor believes the connection exists. A bare conclusion is not enough.</li>
+      <li><strong>Private DBQs are powerful.</strong> Ask your doctor to complete a Disability Benefits Questionnaire (DBQ) for your condition — VA forms that structure the medical opinion exactly how raters read it.</li>
+      <li><strong>If your doctor won't write one,</strong> independent medical opinion (IMO) services exist — VSOs can refer you, or search for "IMO for VA claims."</li>
+    </ul>
+  </div>
+
+</div>
+
+<style>
+  #primaryConditionRow { display: none; }
+
+  @media print {
+    body * { visibility: hidden !important; }
+    #printArea, #printArea * { visibility: visible !important; }
+    #printArea {
+      position: fixed !important;
+      top: 0 !important;
+      left: 0 !important;
+      width: 100% !important;
+      border: none !important;
+      padding: 30px 52px !important;
+    }
+  }
+</style>
+
+<script>
+function toggleSecondaryField() {
+  const val = document.getElementById('connType').value;
+  const row = document.getElementById('primaryConditionRow');
+  row.style.display = (val === 'secondary') ? 'block' : 'none';
+}
+
+function generateLetter() {
+  const vetName      = document.getElementById('vetName').value.trim();
+  const vetFile      = document.getElementById('vetFile').value.trim();
+  const condition    = document.getElementById('condition').value.trim();
+  const connType     = document.getElementById('connType').value;
+  const primary      = document.getElementById('primaryCondition').value.trim();
+  const inService    = document.getElementById('inServiceEvent').value.trim();
+  const drName       = document.getElementById('drName').value.trim();
+  const drSpecialty  = document.getElementById('drSpecialty').value.trim();
+
+  const errEl = document.getElementById('errorMsg');
+  if (!vetName || !vetFile || !condition || !connType || !inService) {
+    errEl.textContent = 'Please fill in all required fields (marked with *).';
+    errEl.style.display = 'block';
+    return;
+  }
+  if (connType === 'secondary' && !primary) {
+    errEl.textContent = 'Please enter the primary service-connected condition for a secondary claim.';
+    errEl.style.display = 'block';
+    return;
+  }
+  errEl.style.display = 'none';
+
+  const today = new Date().toLocaleDateString('en-US', { year:'numeric', month:'long', day:'numeric' });
+
+  // Doctor address block
+  let drBlock = '';
+  if (drName || drSpecialty) {
+    drBlock = (drName || 'Dear Doctor') + (drSpecialty ? '\n' + drSpecialty : '') + '\n\n';
+  }
+
+  // RE line
+  const reText = `RE: Nexus Letter Request — ${vetName} (VA File: ${vetFile})\nCondition: ${condition}`;
+
+  // Body
+  let body = `Dear ${drName ? drName : 'Doctor'},\n\n`;
+  body += `I am a veteran currently pursuing a VA disability claim for ${condition}. I am writing to respectfully request a medical nexus opinion letter from you to support my claim.\n\n`;
+
+  body += `WHAT IS A NEXUS LETTER?\n\n`;
+  body += `A nexus letter is a medical opinion from a treating or examining physician that establishes a connection between a veteran's current diagnosis and their military service. The Department of Veterans Affairs (38 C.F.R. § 3.303) uses medical evidence to determine whether a condition is "service-connected." Without a nexus opinion, the VA frequently denies claims even when the connection is clinically clear.\n\n`;
+
+  body += `THE LEGAL STANDARD — "AT LEAST AS LIKELY AS NOT"\n\n`;
+  body += `The VA does not require certainty. The threshold is a 50% or greater probability — expressed in your letter as:\n\n`;
+  body += `    "It is at least as likely as not that [condition] is related to [in-service event/condition]."\n\n`;
+  body += `If the probability is higher you may also use "more likely than not" or "highly likely." The opinion must also include a brief rationale explaining your medical reasoning — an opinion without rationale will be rejected by the VA rater.\n\n`;
+
+  if (connType === 'direct') {
+    body += `BASIS FOR MY CLAIM (DIRECT SERVICE CONNECTION)\n\n`;
+    body += `I am claiming direct service connection — meaning my ${condition} was caused by events, injuries, or exposures during my military service. Specifically:\n\n`;
+    body += `    ${inService}\n\n`;
+    body += `I am asking you to provide a medical opinion as to whether it is at least as likely as not that my current ${condition} is a result of the above in-service events/exposures.\n\n`;
+  } else if (connType === 'secondary') {
+    body += `BASIS FOR MY CLAIM (SECONDARY SERVICE CONNECTION)\n\n`;
+    body += `I am claiming secondary service connection — meaning my ${condition} was caused or aggravated by ${primary}, which is already rated as service-connected by the VA.\n\n`;
+    body += `Relevant in-service history:\n\n    ${inService}\n\n`;
+    body += `I am asking you to provide a medical opinion as to whether it is at least as likely as not that my current ${condition} was caused or aggravated by my service-connected ${primary}.\n\n`;
+  } else {
+    body += `BASIS FOR MY CLAIM (AGGRAVATION OF PRE-EXISTING CONDITION)\n\n`;
+    body += `I am claiming aggravation — my ${condition} existed prior to service but was permanently worsened beyond its natural progression by military service. Specifically:\n\n`;
+    body += `    ${inService}\n\n`;
+    body += `I am asking you to provide a medical opinion as to whether it is at least as likely as not that my military service permanently aggravated my ${condition} beyond its natural progression.\n\n`;
+  }
+
+  body += `WHAT TO INCLUDE IN YOUR LETTER\n\n`;
+  body += `Please write your opinion on your professional letterhead and include:\n\n`;
+  body += `1. Your name, credentials, and specialty\n`;
+  body += `2. Your treating relationship with me and how long you have treated me\n`;
+  body += `3. My current diagnosis of ${condition}\n`;
+  body += `4. The nexus opinion using the "at least as likely as not" language above\n`;
+  body += `5. A brief rationale explaining your medical reasoning\n`;
+  body += `6. Your signature and date\n\n`;
+
+  body += `I understand this is outside your normal scope of practice and I genuinely appreciate your time. If you would like additional records, my military service documentation, or further information to support your opinion, I am happy to provide them.\n\n`;
+  body += `Please feel free to contact me with any questions.\n\n`;
+  body += `Respectfully,\n\n\n`;
+  body += `${vetName}\nVA File: ${vetFile}`;
+
+  // Populate output
+  document.getElementById('out_date').textContent = today;
+  document.getElementById('out_drAddress').textContent = drBlock;
+  document.getElementById('out_re').textContent = reText;
+  document.getElementById('out_body').textContent = body;
+
+  document.getElementById('previewCard').style.display = 'block';
+  document.getElementById('previewCard').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function clearForm() {
+  ['vetName','vetFile','condition','inServiceEvent','drName','drSpecialty','primaryCondition'].forEach(id => {
+    document.getElementById(id).value = '';
+  });
+  document.getElementById('connType').value = '';
+  document.getElementById('primaryConditionRow').style.display = 'none';
+  document.getElementById('previewCard').style.display = 'none';
+  document.getElementById('errorMsg').style.display = 'none';
+}
+</script>
+
+{% endblock %}
