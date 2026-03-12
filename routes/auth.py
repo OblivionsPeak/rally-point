@@ -1,6 +1,7 @@
 """Login, signup, logout routes."""
+import os
 from flask import Blueprint, render_template, request, redirect, url_for, session, flash
-from supabase_client import anon_client
+from supabase_client import anon_client, svc_client
 
 bp = Blueprint('auth', __name__)
 
@@ -65,3 +66,58 @@ def logout():
         pass
     session.clear()
     return redirect(url_for('index'))
+
+
+@bp.get('/auth/forgot')
+def forgot_page():
+    if session.get('user'):
+        return redirect(url_for('dashboard.home'))
+    return render_template('forgot_password.html')
+
+
+@bp.post('/auth/forgot')
+def forgot_send():
+    email   = request.form.get('email', '').strip()
+    app_url = os.environ.get('APP_URL', '')
+    if email:
+        try:
+            anon_client.auth.reset_password_for_email(
+                email,
+                options={'redirect_to': f'{app_url}/auth/reset'},
+            )
+        except Exception:
+            pass  # Don't reveal whether email exists
+    flash("If that email is registered, you'll receive a reset link shortly. Check your inbox.")
+    return redirect(url_for('auth.forgot_page'))
+
+
+@bp.get('/auth/reset')
+def reset_page():
+    return render_template('reset_password.html')
+
+
+@bp.post('/auth/reset')
+def reset_do():
+    token   = request.form.get('token', '').strip()
+    new_pw  = request.form.get('new_password', '')
+    confirm = request.form.get('confirm_password', '')
+
+    if not token:
+        flash('Invalid or expired reset link. Please request a new one.')
+        return redirect(url_for('auth.forgot_page'))
+    if new_pw != confirm:
+        flash('Passwords do not match.')
+        return redirect(url_for('auth.reset_page'))
+    if len(new_pw) < 8:
+        flash('Password must be at least 8 characters.')
+        return redirect(url_for('auth.reset_page'))
+
+    try:
+        user_resp = anon_client.auth.get_user(token)
+        user_id   = user_resp.user.id
+        svc_client.auth.admin.update_user_by_id(user_id, {'password': new_pw})
+        flash('Password updated. Please log in with your new password.')
+        return redirect(url_for('auth.login_page'))
+    except Exception:
+        flash('Reset link is invalid or has expired. Please request a new one.')
+        return redirect(url_for('auth.forgot_page'))
