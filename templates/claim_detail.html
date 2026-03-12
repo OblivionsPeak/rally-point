@@ -94,4 +94,33 @@
   <p style="font-size:14px; color:var(--muted);">{{ claim.notes }}</p>
 </div>
 {% endif %}
+
+{% if secondaries %}
+<div style="margin-top:28px;">
+  <h2 style="font-size:18px; font-weight:700; margin-bottom:4px;">Related Conditions You May Be Entitled To</h2>
+  <p style="font-size:13px; color:var(--muted); margin-bottom:16px;">
+    Based on your <strong>{{ claim.condition }}</strong> claim, veterans commonly also claim these secondary conditions.
+    Each one is separately ratable — meaning it can add to your overall disability percentage.
+    <strong>Always discuss with your doctor and a VSO before filing.</strong>
+  </p>
+  <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(280px, 1fr)); gap:16px;">
+    {% for s in secondaries %}
+    <div class="card" style="border-color:var(--border);">
+      <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:10px;">
+        <div style="font-weight:600; font-size:15px;">{{ s.condition }}</div>
+        <a href="/claims/new?condition={{ s.condition|urlencode }}&claim_type=secondary"
+           class="btn btn-secondary btn-sm" style="white-space:nowrap; flex-shrink:0; margin-left:10px;">
+          + Track This
+        </a>
+      </div>
+      <p style="font-size:13px; color:var(--muted); margin-bottom:10px; line-height:1.6;">{{ s.why }}</p>
+      <div style="background:var(--bg); border:1px solid var(--border); border-radius:6px; padding:10px; font-size:12px; color:var(--muted);">
+        <strong style="color:var(--text);">Evidence needed:</strong> {{ s.evidence }}
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% endif %}
+
 {% endblock %}

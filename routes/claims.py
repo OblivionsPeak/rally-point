@@ -2,6 +2,7 @@
 from flask import Blueprint, render_template, request, redirect, url_for, session, flash
 from supabase_client import svc_client
 from routes.dashboard import login_required
+from data.secondaries import get_secondaries
 
 bp = Blueprint('claims', __name__)
 
@@ -9,7 +10,10 @@ bp = Blueprint('claims', __name__)
 @bp.get('/claims/new')
 @login_required
 def new_claim():
-    return render_template('claim_new.html')
+    # Pre-fill from query params when coming from condition suggester
+    prefill_condition   = request.args.get('condition', '')
+    prefill_claim_type  = request.args.get('claim_type', 'initial')
+    return render_template('claim_new.html', prefill_condition=prefill_condition, prefill_claim_type=prefill_claim_type)
 
 
 @bp.post('/claims/new')
@@ -35,9 +39,10 @@ def view_claim(claim_id):
     claim   = svc_client.table('claims').select('*').eq('id', claim_id).eq('user_id', user_id).maybe_single().execute()
     if not claim.data:
         return redirect(url_for('dashboard.home'))
-    events  = svc_client.table('claim_events').select('*').eq('claim_id', claim_id).order('created_at').execute()
-    docs    = svc_client.table('documents').select('*').eq('claim_id', claim_id).order('created_at').execute()
-    return render_template('claim_detail.html', claim=claim.data, events=events.data or [], docs=docs.data or [])
+    events     = svc_client.table('claim_events').select('*').eq('claim_id', claim_id).order('created_at').execute()
+    docs       = svc_client.table('documents').select('*').eq('claim_id', claim_id).order('created_at').execute()
+    secondaries = get_secondaries(claim.data['condition'])
+    return render_template('claim_detail.html', claim=claim.data, events=events.data or [], docs=docs.data or [], secondaries=secondaries)
 
 
 @bp.post('/claims/<claim_id>/status')

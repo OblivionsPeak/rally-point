@@ -10,17 +10,17 @@
     <form method="POST" action="/claims/new">
       <div class="form-group">
         <label class="form-label">Condition / Disability</label>
-        <input type="text" name="condition" class="form-control" placeholder="e.g. PTSD, Tinnitus, Lumbar strain" required autofocus>
+        <input type="text" name="condition" class="form-control" placeholder="e.g. PTSD, Tinnitus, Lumbar strain" value="{{ prefill_condition }}" required autofocus>
       </div>
       <div class="form-group">
         <label class="form-label">Claim Type</label>
         <select name="claim_type" class="form-control">
-          <option value="initial">Initial Claim</option>
-          <option value="increase">Claim for Increase</option>
-          <option value="secondary">Secondary Condition</option>
-          <option value="supplemental">Supplemental Claim</option>
-          <option value="hlr">Higher-Level Review (HLR)</option>
-          <option value="bva">Board Appeal (BVA)</option>
+          <option value="initial"      {{ 'selected' if prefill_claim_type == 'initial' }}>Initial Claim</option>
+          <option value="increase"     {{ 'selected' if prefill_claim_type == 'increase' }}>Claim for Increase</option>
+          <option value="secondary"    {{ 'selected' if prefill_claim_type == 'secondary' }}>Secondary Condition</option>
+          <option value="supplemental" {{ 'selected' if prefill_claim_type == 'supplemental' }}>Supplemental Claim</option>
+          <option value="hlr"          {{ 'selected' if prefill_claim_type == 'hlr' }}>Higher-Level Review (HLR)</option>
+          <option value="bva"          {{ 'selected' if prefill_claim_type == 'bva' }}>Board Appeal (BVA)</option>
         </select>
       </div>
       <div class="form-group">
