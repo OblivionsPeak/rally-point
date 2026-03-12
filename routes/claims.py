@@ -80,3 +80,25 @@ def toggle_doc(claim_id, doc_id):
     if doc.data:
         svc_client.table('documents').update({'collected': not doc.data['collected']}).eq('id', doc_id).execute()
     return redirect(url_for('claims.view_claim', claim_id=claim_id))
+
+
+@bp.get('/claims/<claim_id>/denial')
+@login_required
+def denial(claim_id):
+    user_id = session['user']['id']
+    claim   = svc_client.table('claims').select('*').eq('id', claim_id).eq('user_id', user_id).maybe_single().execute()
+    if not claim.data:
+        return redirect(url_for('dashboard.home'))
+    return render_template('denial.html', claim=claim.data)
+
+
+@bp.post('/claims/<claim_id>/rating')
+@login_required
+def update_rating(claim_id):
+    user_id = session['user']['id']
+    rating  = request.form.get('rating')
+    svc_client.table('claims').update({
+        'rating': int(rating) if rating else None,
+        'status': 'decision_made',
+    }).eq('id', claim_id).eq('user_id', user_id).execute()
+    return redirect(url_for('claims.denial', claim_id=claim_id))

@@ -1,0 +1,180 @@
+{% extends "base.html" %}
+{% block title %}Understanding Your Decision — {{ claim.condition }} — Rally Point{% endblock %}
+{% block content %}
+
+<div style="margin-bottom:24px;">
+  <a href="/claims/{{ claim.id }}" style="font-size:13px; color:var(--muted);">← Back to {{ claim.condition }}</a>
+  <h1 style="font-size:26px; font-weight:700; margin-top:6px;">Understanding Your Decision</h1>
+  <p style="color:var(--muted); margin-top:4px;">{{ claim.condition }}</p>
+</div>
+
+<!-- What you received -->
+<div class="card" style="margin-bottom:20px;">
+  <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
+    <div>
+      <div style="font-size:13px; color:var(--muted); margin-bottom:4px;">Decision received</div>
+      {% if claim.rating == 0 or claim.rating == None %}
+        <div style="font-size:28px; font-weight:800; color:var(--danger);">Denied</div>
+        <div style="font-size:13px; color:var(--muted); margin-top:4px;">The VA determined your condition is not service-connected, or the evidence was insufficient.</div>
+      {% else %}
+        <div style="font-size:28px; font-weight:800; color:var(--accent);">{{ claim.rating }}%</div>
+        <div style="font-size:13px; color:var(--muted); margin-top:4px;">
+          {% if claim.rating < 30 %}Rated lower than expected? You have options.
+          {% elif claim.rating < 70 %}If your symptoms are more severe than this reflects, you can appeal.
+          {% else %}A significant rating. You can still appeal if it doesn't reflect your actual impairment.
+          {% endif %}
+        </div>
+      {% endif %}
+    </div>
+    <!-- Update rating form -->
+    <form method="POST" action="/claims/{{ claim.id }}/rating" style="display:flex; gap:8px; align-items:center;">
+      <label style="font-size:13px; color:var(--muted);">Update rating:</label>
+      <select name="rating" class="form-control" style="width:auto;">
+        <option value="">Denied (0%)</option>
+        {% for r in [10,20,30,40,50,60,70,80,90,100] %}
+        <option value="{{ r }}" {{ 'selected' if claim.rating == r }}>{{ r }}%</option>
+        {% endfor %}
+      </select>
+      <button type="submit" class="btn btn-secondary btn-sm">Save</button>
+    </form>
+  </div>
+</div>
+
+<!-- Deadline warning -->
+<div style="background:#2d1f00; border:1px solid #6e4b0f; border-radius:8px; padding:14px 18px; margin-bottom:24px; display:flex; gap:12px; align-items:flex-start;">
+  <div style="font-size:18px;">⏰</div>
+  <div>
+    <div style="font-weight:600; font-size:14px; margin-bottom:2px; color:#d29922;">You have 1 year from the decision date to appeal</div>
+    <div style="font-size:13px; color:var(--muted);">After 1 year, you lose the effective date and would have to refile. Don't wait — even if you need time to gather evidence, start the process now.</div>
+  </div>
+</div>
+
+<div style="display:grid; grid-template-columns:1fr 1fr; gap:20px; align-items:start;">
+
+  <!-- Appeal paths -->
+  <div>
+    <h2 style="font-size:17px; font-weight:700; margin-bottom:16px;">Your Three Appeal Options</h2>
+
+    <!-- Supplemental Claim -->
+    <div class="card" style="margin-bottom:14px; border-left:3px solid var(--accent);">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+        <div style="font-weight:700; font-size:15px;">Supplemental Claim</div>
+        <span class="badge badge-decided">Best if: new evidence</span>
+      </div>
+      <p style="font-size:13px; color:var(--muted); margin-bottom:10px; line-height:1.6;">
+        Submit new and relevant evidence the VA didn't have before — a nexus letter from your doctor, a buddy statement, new medical records, or a private medical opinion. The VA must consider it.
+      </p>
+      <div style="font-size:13px;">
+        <div style="margin-bottom:4px;"><strong>Timeline:</strong> 4–5 months average</div>
+        <div style="margin-bottom:4px;"><strong>Preserves effective date:</strong> Yes, if filed within 1 year</div>
+        <div><strong>Best for:</strong> You have a doctor willing to write a nexus letter, or you have records the VA missed</div>
+      </div>
+    </div>
+
+    <!-- Higher-Level Review -->
+    <div class="card" style="margin-bottom:14px; border-left:3px solid var(--warning);">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+        <div style="font-weight:700; font-size:15px;">Higher-Level Review (HLR)</div>
+        <span class="badge badge-review">Best if: VA made an error</span>
+      </div>
+      <p style="font-size:13px; color:var(--muted); margin-bottom:10px; line-height:1.6;">
+        A senior VA rater reviews your existing file with fresh eyes. No new evidence allowed — this is for when you believe the VA misapplied the law, ignored existing evidence, or made a clear error.
+      </p>
+      <div style="font-size:13px;">
+        <div style="margin-bottom:4px;"><strong>Timeline:</strong> 4–5 months average</div>
+        <div style="margin-bottom:4px;"><strong>Preserves effective date:</strong> Yes, if filed within 1 year</div>
+        <div><strong>Best for:</strong> The rating decision ignored evidence already in your file, or the examiner's report was clearly wrong</div>
+      </div>
+    </div>
+
+    <!-- BVA Appeal -->
+    <div class="card" style="border-left:3px solid var(--muted);">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+        <div style="font-weight:700; font-size:15px;">Board Appeal (BVA)</div>
+        <span class="badge badge-pending">Best if: complex case</span>
+      </div>
+      <p style="font-size:13px; color:var(--muted); margin-bottom:10px; line-height:1.6;">
+        Appeal to the Board of Veterans Appeals. A Veterans Law Judge reviews your case. Slowest path but most thorough — and the board can order new C&P exams or development on your behalf.
+      </p>
+      <div style="font-size:13px;">
+        <div style="margin-bottom:4px;"><strong>Timeline:</strong> 1–3 years depending on lane chosen</div>
+        <div style="margin-bottom:4px;"><strong>Preserves effective date:</strong> Yes, if filed within 1 year</div>
+        <div><strong>Best for:</strong> Complex cases, long history of denials, or you want a hearing before a judge</div>
+      </div>
+    </div>
+
+    <div style="margin-top:16px; padding:14px; background:var(--surface); border:1px solid var(--border); border-radius:8px; font-size:13px; color:var(--muted);">
+      <strong style="color:var(--text);">Get free help:</strong> A VSO (Veterans Service Officer) from the DAV, VFW, American Legion, or your state veterans affairs office will review your case and help you choose the right path — at no cost. Find one at <strong>va.gov/decision-reviews/get-help-with-review-request</strong>
+    </div>
+  </div>
+
+  <!-- AI explainer -->
+  <div>
+    <div class="card" style="position:sticky; top:72px;">
+      <div class="card-title">Understand Your Decision</div>
+      <p style="font-size:13px; color:var(--muted); margin-bottom:16px;">
+        Ask about your denial, what the VA was looking for, or which appeal path makes sense for your situation.
+      </p>
+      <div class="chat-container" id="chat" style="height:460px;">
+        <div class="chat-messages" id="chatMessages">
+          <div class="chat-msg assistant">
+            I can help you understand your {{ claim.condition }} decision
+            {% if claim.rating %}(rated {{ claim.rating }}%){% else %}(denied){% endif %}.
+            What do you want to know — why it was denied, what evidence might change it, or which appeal path to take?
+          </div>
+        </div>
+        <div class="chat-input-row">
+          <input type="text" class="form-control" id="chatInput" placeholder="Ask about your decision...">
+          <button class="btn btn-primary" onclick="sendMessage()">Send</button>
+        </div>
+      </div>
+      <p style="font-size:11px; color:var(--muted); margin-top:10px; text-align:center;">Not legal advice. Verify decisions with a VSO.</p>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const condition = {{ claim.condition | tojson }};
+const rating    = {{ claim.rating | tojson }};
+const history   = [];
+const context   = `Veteran is reviewing a VA decision on: ${condition}. Rating received: ${rating !== null ? rating + '%' : 'Denied'}. Help them understand their options and which appeal path fits their situation.`;
+
+async function sendMessage() {
+  const input = document.getElementById('chatInput');
+  const msg = input.value.trim();
+  if (!msg) return;
+  appendMsg(msg, 'user');
+  input.value = '';
+  const thinking = appendMsg('...', 'assistant');
+  try {
+    const res = await fetch('/api/assistant', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({ message: msg, history, context }),
+    });
+    const data = await res.json();
+    thinking.textContent = data.reply || data.error || 'Something went wrong.';
+    history.push({role: 'user', content: msg});
+    history.push({role: 'assistant', content: data.reply || ''});
+  } catch(e) {
+    thinking.textContent = 'Could not reach assistant. Try again.';
+  }
+}
+
+function appendMsg(text, role) {
+  const box = document.getElementById('chatMessages');
+  const div = document.createElement('div');
+  div.className = `chat-msg ${role}`;
+  div.textContent = text;
+  box.appendChild(div);
+  box.scrollTop = box.scrollHeight;
+  return div;
+}
+
+document.getElementById('chatInput').addEventListener('keydown', e => {
+  if (e.key === 'Enter') sendMessage();
+});
+</script>
+
+{% endblock %}
