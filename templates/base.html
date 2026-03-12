@@ -16,7 +16,19 @@
       <a href="/settings">Settings</a>
       <a href="/logout">Log Out</a>
     </div>
+    <button class="nav-hamburger" onclick="toggleNav()" aria-label="Menu">&#9776;</button>
   </nav>
+  <div class="nav-drawer" id="navDrawer">
+    <a href="/dashboard">Dashboard</a>
+    <a href="/claims/new">+ New Claim</a>
+    <a href="/settings">Settings</a>
+    <a href="/logout">Log Out</a>
+  </div>
+  <script>
+    function toggleNav() {
+      document.getElementById('navDrawer').classList.toggle('open');
+    }
+  </script>
   {% endif %}
 
   <main class="main-content">

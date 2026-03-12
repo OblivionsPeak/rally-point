@@ -214,3 +214,83 @@ textarea.form-control { resize: vertical; min-height: 80px; }
 .chat-msg.assistant { background: var(--surface); border: 1px solid var(--border); align-self: flex-start; }
 .chat-input-row { display: flex; gap: 8px; padding: 12px 0 0; border-top: 1px solid var(--border); }
 .chat-input-row input { flex: 1; }
+
+/* Hamburger (hidden on desktop) */
+.nav-hamburger {
+  display: none;
+  background: none;
+  border: none;
+  color: var(--text);
+  cursor: pointer;
+  padding: 8px;
+  font-size: 22px;
+  line-height: 1;
+}
+
+/* Mobile nav drawer */
+.nav-drawer {
+  display: none;
+  flex-direction: column;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 8px 0;
+}
+.nav-drawer a {
+  display: block;
+  padding: 13px 24px;
+  color: var(--muted);
+  font-size: 15px;
+  border-bottom: 1px solid var(--border);
+}
+.nav-drawer a:last-child { border-bottom: none; }
+.nav-drawer a:hover { color: var(--text); text-decoration: none; background: var(--bg); }
+.nav-drawer.open { display: flex; }
+
+/* ── Mobile ────────────────────────────────────────────────────────────────── */
+@media (max-width: 640px) {
+
+  /* Navbar */
+  .nav-links     { display: none; }
+  .nav-hamburger { display: block; }
+
+  /* Spacing */
+  .main-content  { padding: 20px 16px; }
+  .card          { padding: 18px 16px; }
+
+  /* Hero */
+  .hero          { padding: 48px 16px 36px; }
+  .hero h1       { font-size: 28px; }
+  .hero p        { font-size: 16px; }
+
+  /* Dashboard header — stack button below title */
+  .page-header   { flex-direction: column; align-items: flex-start; gap: 12px; }
+
+  /* 2-column grids → single column */
+  [style*="grid-template-columns:1fr 1fr"],
+  [style*="grid-template-columns: 1fr 1fr"] {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Claim detail header actions — stack vertically */
+  [style*="justify-content:space-between"][style*="flex-wrap:wrap"] {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  /* Chat — shorter on mobile so keyboard doesn't bury it */
+  .chat-container { height: 340px; }
+  .chat-msg       { max-width: 92%; }
+
+  /* Full-width buttons in forms */
+  .btn-primary, .btn-secondary {
+    width: 100%;
+    justify-content: center;
+  }
+  /* But not inside flex rows (checklist add, chat send) */
+  .chat-input-row .btn,
+  form[style*="display:flex"] .btn {
+    width: auto;
+  }
+
+  /* Features grid already uses auto-fit, no change needed */
+}
