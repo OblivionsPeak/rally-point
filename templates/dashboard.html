@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+{% block title %}Dashboard — Rally Point{% endblock %}
+{% block content %}
+<div class="page-header" style="display:flex; justify-content:space-between; align-items:flex-start;">
+  <div>
+    <h1>Your Claims</h1>
+    <p>
+      {% if profile and profile.current_rating %}
+        Current rating: <strong>{{ profile.current_rating }}%</strong> &nbsp;·&nbsp;
+      {% endif %}
+      {{ claims|length }} claim{{ 's' if claims|length != 1 else '' }} tracked
+    </p>
+  </div>
+  <a href="/claims/new" class="btn btn-primary">+ New Claim</a>
+</div>
+
+{% if not claims %}
+<div class="empty-state">
+  <h3>No claims tracked yet</h3>
+  <p>Add your first claim to start tracking its progress.</p>
+  <a href="/claims/new" class="btn btn-primary" style="margin-top:16px">Add Your First Claim</a>
+</div>
+{% else %}
+{% for claim in claims %}
+<a href="/claims/{{ claim.id }}" style="text-decoration:none; color:inherit; display:block;">
+  <div class="card" style="cursor:pointer; transition:border-color 0.15s;" onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='var(--border)'">
+    <div style="display:flex; justify-content:space-between; align-items:center;">
+      <div>
+        <div style="font-weight:600; font-size:16px; margin-bottom:4px;">{{ claim.condition }}</div>
+        <div style="font-size:13px; color:var(--muted);">
+          {{ claim.claim_type|title }} claim
+          {% if claim.date_filed %} · Filed {{ claim.date_filed }}{% endif %}
+          {% if claim.rating %} · Rated {{ claim.rating }}%{% endif %}
+        </div>
+      </div>
+      <span class="badge badge-{{ 'review' if claim.status == 'in_review' else 'decided' if claim.status == 'decision_made' else 'closed' if claim.status == 'closed' else 'pending' }}">
+        {{ claim.status|replace('_', ' ')|title }}
+      </span>
+    </div>
+  </div>
+</a>
+{% endfor %}
+{% endif %}
+
+<!-- AI Assistant -->
+<div class="card" style="margin-top:32px;">
+  <div class="card-title">Ask Rally Point</div>
+  <p style="font-size:13px; color:var(--muted); margin-bottom:16px;">
+    Questions about your claim status, what evidence to gather, C&P exam prep, or conditions you may be entitled to.
+    <strong>Not legal advice</strong> — always verify important decisions with a VSO.
+  </p>
+  <div class="chat-container" id="chat">
+    <div class="chat-messages" id="chatMessages">
+      <div class="chat-msg assistant">Hi. I'm Rally Point. Ask me anything about the VA claims process — denials, evidence, exams, secondary conditions, appeals. What's on your mind?</div>
+    </div>
+    <div class="chat-input-row">
+      <input type="text" class="form-control" id="chatInput" placeholder="Ask a question...">
+      <button class="btn btn-primary" onclick="sendMessage()">Send</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const history = [];
+
+async function sendMessage() {
+  const input = document.getElementById('chatInput');
+  const msg = input.value.trim();
+  if (!msg) return;
+
+  appendMsg(msg, 'user');
+  input.value = '';
+
+  const thinking = appendMsg('...', 'assistant');
+
+  try {
+    const res = await fetch('/api/assistant', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({ message: msg, history }),
+    });
+    const data = await res.json();
+    thinking.textContent = data.reply || data.error || 'Something went wrong.';
+    history.push({role: 'user', content: msg});
+    history.push({role: 'assistant', content: data.reply || ''});
+  } catch (e) {
+    thinking.textContent = 'Could not reach the assistant. Try again.';
+  }
+}
+
+function appendMsg(text, role) {
+  const box   = document.getElementById('chatMessages');
+  const div   = document.createElement('div');
+  div.className = `chat-msg ${role}`;
+  div.textContent = text;
+  box.appendChild(div);
+  box.scrollTop = box.scrollHeight;
+  return div;
+}
+
+document.getElementById('chatInput').addEventListener('keydown', e => {
+  if (e.key === 'Enter') sendMessage();
+});
+</script>
+{% endblock %}

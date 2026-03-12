@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+{% block title %}{{ claim.condition }} — Rally Point{% endblock %}
+{% block content %}
+<div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:24px; flex-wrap:wrap; gap:12px;">
+  <div>
+    <a href="/dashboard" style="font-size:13px; color:var(--muted);">← Back to Dashboard</a>
+    <h1 style="font-size:26px; font-weight:700; margin-top:6px;">{{ claim.condition }}</h1>
+    <div style="font-size:13px; color:var(--muted); margin-top:4px;">
+      {{ claim.claim_type|replace('_',' ')|title }}
+      {% if claim.date_filed %} · Filed {{ claim.date_filed }}{% endif %}
+      {% if claim.rating %} · Rated <strong>{{ claim.rating }}%</strong>{% endif %}
+    </div>
+  </div>
+  <span class="badge badge-{{ 'review' if claim.status == 'in_review' else 'decided' if claim.status == 'decision_made' else 'closed' if claim.status == 'closed' else 'pending' }}" style="font-size:13px; padding:4px 14px;">
+    {{ claim.status|replace('_',' ')|title }}
+  </span>
+</div>
+
+<div style="display:grid; grid-template-columns:1fr 1fr; gap:20px; align-items:start;">
+
+  <!-- Timeline -->
+  <div class="card">
+    <div class="card-title">Status Timeline</div>
+    {% if events %}
+    <ul class="timeline">
+      {% for e in events %}
+      <li class="timeline-item">
+        <div class="timeline-date">{{ e.created_at[:10] }}</div>
+        <div class="timeline-text">
+          <strong>{{ e.status|replace('_',' ')|title }}</strong>
+          {% if e.note %}<br><span style="color:var(--muted)">{{ e.note }}</span>{% endif %}
+        </div>
+      </li>
+      {% endfor %}
+    </ul>
+    {% else %}
+    <p style="color:var(--muted); font-size:14px;">No status updates logged yet.</p>
+    {% endif %}
+
+    <div style="margin-top:16px; padding-top:16px; border-top:1px solid var(--border);">
+      <div class="card-title" style="font-size:14px;">Log a Status Update</div>
+      <form method="POST" action="/claims/{{ claim.id }}/status">
+        <div class="form-group">
+          <select name="status" class="form-control">
+            <option value="pending">Pending</option>
+            <option value="in_review">In Review</option>
+            <option value="decision_made">Decision Made</option>
+            <option value="closed">Closed</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <input type="text" name="note" class="form-control" placeholder="Note (optional)">
+        </div>
+        <button type="submit" class="btn btn-secondary btn-sm">Save Update</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Document Checklist -->
+  <div class="card">
+    <div class="card-title">Evidence Checklist</div>
+    <p style="font-size:13px; color:var(--muted); margin-bottom:14px;">
+      Track the documents you need to gather. Check them off as you collect them.
+    </p>
+    {% if docs %}
+    <ul class="checklist">
+      {% for doc in docs %}
+      <li class="checklist-item {{ 'done' if doc.collected else '' }}">
+        <form method="POST" action="/claims/{{ claim.id }}/docs/{{ doc.id }}/toggle" style="display:inline;">
+          <input type="checkbox" onchange="this.form.submit()" {{ 'checked' if doc.collected else '' }}>
+        </form>
+        <span>{{ doc.name }}</span>
+      </li>
+      {% endfor %}
+    </ul>
+    {% else %}
+    <p style="color:var(--muted); font-size:14px;">No documents added yet.</p>
+    {% endif %}
+
+    <form method="POST" action="/claims/{{ claim.id }}/docs" style="display:flex; gap:8px; margin-top:14px; padding-top:14px; border-top:1px solid var(--border);">
+      <input type="text" name="name" class="form-control" placeholder="e.g. Nexus letter from Dr. Smith" required>
+      <button type="submit" class="btn btn-secondary btn-sm" style="white-space:nowrap;">+ Add</button>
+    </form>
+  </div>
+
+</div>
+
+{% if claim.notes %}
+<div class="card" style="margin-top:4px;">
+  <div class="card-title">Notes</div>
+  <p style="font-size:14px; color:var(--muted);">{{ claim.notes }}</p>
+</div>
+{% endif %}
+{% endblock %}

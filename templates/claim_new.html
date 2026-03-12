@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block title %}New Claim — Rally Point{% endblock %}
+{% block content %}
+<div style="max-width:540px;">
+  <div class="page-header">
+    <h1>Add a Claim</h1>
+    <p>Track a new VA disability claim.</p>
+  </div>
+  <div class="card">
+    <form method="POST" action="/claims/new">
+      <div class="form-group">
+        <label class="form-label">Condition / Disability</label>
+        <input type="text" name="condition" class="form-control" placeholder="e.g. PTSD, Tinnitus, Lumbar strain" required autofocus>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Claim Type</label>
+        <select name="claim_type" class="form-control">
+          <option value="initial">Initial Claim</option>
+          <option value="increase">Claim for Increase</option>
+          <option value="secondary">Secondary Condition</option>
+          <option value="supplemental">Supplemental Claim</option>
+          <option value="hlr">Higher-Level Review (HLR)</option>
+          <option value="bva">Board Appeal (BVA)</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Date Filed <span style="color:var(--muted)">(optional)</span></label>
+        <input type="date" name="date_filed" class="form-control">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Notes <span style="color:var(--muted)">(optional)</span></label>
+        <textarea name="notes" class="form-control" placeholder="Any details you want to remember..."></textarea>
+      </div>
+      <div style="display:flex; gap:10px;">
+        <button type="submit" class="btn btn-primary">Add Claim</button>
+        <a href="/dashboard" class="btn btn-secondary">Cancel</a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

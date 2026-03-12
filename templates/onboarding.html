@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% block title %}Setup — Rally Point{% endblock %}
+{% block content %}
+<div style="max-width:500px; margin:0 auto;">
+  <div class="page-header">
+    <h1>Let's get you set up</h1>
+    <p>This helps us tailor information to your situation. You can update this any time.</p>
+  </div>
+  <div class="card">
+    <form method="POST" action="/onboarding">
+      <div class="form-group">
+        <label class="form-label">Branch of Service</label>
+        <select name="branch" class="form-control">
+          <option value="">Select branch</option>
+          <option value="army">Army</option>
+          <option value="navy">Navy</option>
+          <option value="marines">Marine Corps</option>
+          <option value="air_force">Air Force</option>
+          <option value="space_force">Space Force</option>
+          <option value="coast_guard">Coast Guard</option>
+          <option value="national_guard">National Guard</option>
+          <option value="reserves">Reserves</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Discharge Type</label>
+        <select name="discharge_type" class="form-control">
+          <option value="">Select discharge</option>
+          <option value="honorable">Honorable</option>
+          <option value="general">General (Under Honorable)</option>
+          <option value="oth">Other Than Honorable</option>
+          <option value="bad_conduct">Bad Conduct</option>
+          <option value="dishonorable">Dishonorable</option>
+          <option value="still_serving">Still Serving</option>
+        </select>
+      </div>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+        <div class="form-group">
+          <label class="form-label">Service Start</label>
+          <input type="date" name="service_start" class="form-control">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Service End</label>
+          <input type="date" name="service_end" class="form-control">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Current VA Rating (if any)</label>
+        <select name="current_rating" class="form-control">
+          <option value="">Not rated yet</option>
+          {% for r in [0,10,20,30,40,50,60,70,80,90,100] %}
+          <option value="{{ r }}">{{ r }}%</option>
+          {% endfor %}
+        </select>
+      </div>
+      <button type="submit" class="btn btn-primary" style="width:100%">Continue to Dashboard</button>
+    </form>
+  </div>
+</div>
+{% endblock %}
