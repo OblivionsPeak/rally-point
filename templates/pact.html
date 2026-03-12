@@ -1,0 +1,410 @@
+{% extends "base.html" %}
+{% block title %}PACT Act Checker — Rally Point{% endblock %}
+{% block content %}
+
+<div class="page-header">
+  <h1>PACT Act Presumptive Checker</h1>
+  <p>The PACT Act (2022) added hundreds of presumptive conditions — meaning the VA must presume they're service-connected without requiring a nexus letter. Check every box that applies to your service.</p>
+</div>
+
+<div style="display:grid; grid-template-columns:1fr 1fr; gap:20px; align-items:start;">
+
+  <!-- Left: Checklist -->
+  <div class="card" style="margin-bottom:0;">
+    <div class="card-title">Your Service History</div>
+    <p style="font-size:13px; color:var(--muted); margin-bottom:20px;">
+      Check all that apply. Results update instantly.
+    </p>
+
+    <div id="checks" style="display:flex; flex-direction:column; gap:0;">
+
+      <label class="pact-check" data-key="burn_pit">
+        <input type="checkbox" value="burn_pit">
+        <div>
+          <div class="pact-label">Post-9/11 combat zone service</div>
+          <div class="pact-sub">Iraq, Afghanistan, Djibouti, Syria, Kuwait, Qatar, UAE, Saudi Arabia, Oman, Bahrain, Uzbekistan, Yemen, Jordan, Egypt — on or after Aug 2, 1990</div>
+        </div>
+      </label>
+
+      <label class="pact-check" data-key="agent_orange_vietnam">
+        <input type="checkbox" value="agent_orange_vietnam">
+        <div>
+          <div class="pact-label">Vietnam / Southeast Asia service</div>
+          <div class="pact-sub">Vietnam, Laos, Cambodia, or their territorial waters — Jan 9, 1962 through May 7, 1975</div>
+        </div>
+      </label>
+
+      <label class="pact-check" data-key="agent_orange_navy">
+        <input type="checkbox" value="agent_orange_navy">
+        <div>
+          <div class="pact-label">Blue Water Navy — Vietnam era</div>
+          <div class="pact-sub">Served offshore Vietnam in the open waters of the Western Pacific — Jan 9, 1962 through May 7, 1975 (PACT Act expanded eligibility)</div>
+        </div>
+      </label>
+
+      <label class="pact-check" data-key="agent_orange_korea">
+        <input type="checkbox" value="agent_orange_korea">
+        <div>
+          <div class="pact-label">Korean DMZ service</div>
+          <div class="pact-sub">Served in or near the Korean Demilitarized Zone — Sep 1, 1967 through Aug 31, 1971</div>
+        </div>
+      </label>
+
+      <label class="pact-check" data-key="agent_orange_c123">
+        <input type="checkbox" value="agent_orange_c123">
+        <div>
+          <div class="pact-label">C-123 aircraft crew or passenger</div>
+          <div class="pact-sub">Flew on or worked with C-123 aircraft known to have been used for Agent Orange spraying — 1969 through 1986</div>
+        </div>
+      </label>
+
+      <label class="pact-check" data-key="camp_lejeune">
+        <input type="checkbox" value="camp_lejeune">
+        <div>
+          <div class="pact-label">Camp Lejeune / MCAS New River, NC</div>
+          <div class="pact-sub">Lived or worked there for at least 30 days (consecutive or non-consecutive) — Aug 1, 1953 through Dec 31, 1987</div>
+        </div>
+      </label>
+
+      <label class="pact-check" data-key="radiation">
+        <input type="checkbox" value="radiation">
+        <div>
+          <div class="pact-label">Radiation exposure</div>
+          <div class="pact-sub">Participated in atmospheric nuclear tests, occupied Hiroshima/Nagasaki after WWII, or were a POW in Japan</div>
+        </div>
+      </label>
+
+      <label class="pact-check" data-key="gulf_war">
+        <input type="checkbox" value="gulf_war">
+        <div>
+          <div class="pact-label">Gulf War / Southwest Asia (no post-9/11)</div>
+          <div class="pact-sub">Served in Iraq, Kuwait, Saudi Arabia, Bahrain, Qatar, UAE, Oman, or neutral zone — Aug 2, 1990 through Aug 31, 2021, without post-9/11 deployment</div>
+        </div>
+      </label>
+
+    </div>
+  </div>
+
+  <!-- Right: Results -->
+  <div id="results">
+    <div class="card" id="noResults" style="text-align:center; color:var(--muted); padding:40px 24px;">
+      <div style="font-size:32px; margin-bottom:12px;">&#9745;</div>
+      <div style="font-weight:600; color:var(--text); margin-bottom:8px;">Select your service history</div>
+      <div style="font-size:13px;">Your PACT Act presumptive conditions will appear here.</div>
+    </div>
+
+    <!-- Burn Pit -->
+    <div class="pact-result" data-key="burn_pit" style="display:none;">
+      <div class="card" style="border-color:#f97316; margin-bottom:16px;">
+        <div style="display:flex; align-items:center; gap:10px; margin-bottom:12px;">
+          <span style="background:#7c2d12; color:#fb923c; font-size:11px; font-weight:700; padding:3px 10px; border-radius:20px;">BURN PITS &amp; AIRBORNE HAZARDS</span>
+        </div>
+        <p style="font-size:13px; color:var(--muted); margin-bottom:16px; line-height:1.7;">
+          The PACT Act created presumptive service connection for veterans exposed to burn pits, open air disposal, and other airborne hazards in Southwest Asia and other locations.
+        </p>
+        <div class="card-title" style="font-size:14px;">Presumptive Cancers &amp; Conditions</div>
+        <ul class="pact-list">
+          <li>Head or neck cancer (any type)</li>
+          <li>Respiratory system cancer (lung, bronchus, larynx, trachea)</li>
+          <li>Gastrointestinal cancer (esophagus, stomach, colon, rectum, anus, liver, gall bladder, bile duct, pancreas)</li>
+          <li>Reproductive system cancer</li>
+          <li>Urinary tract cancer (kidney, bladder, ureter, urethra)</li>
+          <li>Lymphatic cancer (Hodgkin's, non-Hodgkin's lymphoma)</li>
+          <li>Melanoma</li>
+          <li>Any rare cancer (affects fewer than 200,000 Americans per year)</li>
+          <li>Glioblastoma</li>
+          <li>Squamous cell carcinoma of the head or neck</li>
+          <li>Constrictive bronchiolitis or obliterative bronchiolitis</li>
+          <li>Constrictive pericarditis</li>
+          <li>Any illness VA determines is associated with particulate matter exposure</li>
+        </ul>
+        <div class="pact-action">
+          <strong>Next step:</strong> File a claim for any qualifying cancer or respiratory condition using VA Form 21-526EZ.
+          Your DD-214 showing qualifying service location and dates is your primary evidence — no nexus letter required.
+          Denied before Aug 2022? File a Supplemental Claim — PACT Act applies retroactively.
+        </div>
+      </div>
+    </div>
+
+    <!-- Agent Orange Vietnam -->
+    <div class="pact-result" data-key="agent_orange_vietnam" style="display:none;">
+      <div class="card" style="border-color:#84cc16; margin-bottom:16px;">
+        <div style="display:flex; align-items:center; gap:10px; margin-bottom:12px;">
+          <span style="background:#1a2e05; color:#86efac; font-size:11px; font-weight:700; padding:3px 10px; border-radius:20px;">AGENT ORANGE — VIETNAM</span>
+        </div>
+        <p style="font-size:13px; color:var(--muted); margin-bottom:16px; line-height:1.7;">
+          Veterans who served in Vietnam or its territorial waters are presumed to have been exposed to Agent Orange. No proof of actual exposure needed.
+        </p>
+        <div class="card-title" style="font-size:14px;">Presumptive Conditions</div>
+        <ul class="pact-list">
+          <li>AL amyloidosis</li>
+          <li>Bladder cancer</li>
+          <li>Chronic B-cell leukemia</li>
+          <li>Chloracne (or similar acneform disease)</li>
+          <li>Diabetes mellitus type 2</li>
+          <li>Hodgkin's disease</li>
+          <li>Ischemic heart disease</li>
+          <li>Multiple myeloma</li>
+          <li>Non-Hodgkin's lymphoma</li>
+          <li>Parkinson's disease</li>
+          <li>Peripheral neuropathy (early-onset)</li>
+          <li>Porphyria cutanea tarda</li>
+          <li>Prostate cancer</li>
+          <li>Respiratory cancers (lung, larynx, trachea, bronchus)</li>
+          <li>Soft-tissue sarcomas (many types)</li>
+          <li>Hypertension (added by PACT Act 2022)</li>
+          <li>Monoclonal gammopathy of undetermined significance (MGUS) — added by PACT Act</li>
+        </ul>
+        <div class="pact-action">
+          <strong>Next step:</strong> File for any condition on this list. Show Vietnam service via DD-214.
+          If previously denied for a condition now on this list, file a Supplemental Claim.
+          Hypertension was just added — if you have it and served in Vietnam, file now.
+        </div>
+      </div>
+    </div>
+
+    <!-- Blue Water Navy -->
+    <div class="pact-result" data-key="agent_orange_navy" style="display:none;">
+      <div class="card" style="border-color:#22d3ee; margin-bottom:16px;">
+        <div style="display:flex; align-items:center; gap:10px; margin-bottom:12px;">
+          <span style="background:#0c2a32; color:#67e8f9; font-size:11px; font-weight:700; padding:3px 10px; border-radius:20px;">AGENT ORANGE — BLUE WATER NAVY</span>
+        </div>
+        <p style="font-size:13px; color:var(--muted); margin-bottom:16px; line-height:1.7;">
+          The PACT Act extended Agent Orange presumptive status to Blue Water Navy veterans who served offshore Vietnam — reversing decades of VA denials.
+          Same presumptive conditions as Vietnam in-country service apply.
+        </p>
+        <div class="card-title" style="font-size:14px;">Qualifying Ships</div>
+        <p style="font-size:13px; color:var(--muted); margin-bottom:12px; line-height:1.6;">
+          If your ship is on the VA's Blue Water Navy ship list, you qualify automatically.
+          If it's not, you may still qualify by showing the ship entered Vietnam's inland waterways or docked in Vietnam.
+        </p>
+        <div class="pact-action">
+          <strong>Next step:</strong> Check the VA's ship list at va.gov. File for any Agent Orange presumptive condition.
+          If denied previously as Blue Water Navy, this is grounds for a Supplemental Claim — the law changed in your favor.
+        </div>
+      </div>
+    </div>
+
+    <!-- Agent Orange Korea -->
+    <div class="pact-result" data-key="agent_orange_korea" style="display:none;">
+      <div class="card" style="border-color:#a78bfa; margin-bottom:16px;">
+        <div style="display:flex; align-items:center; gap:10px; margin-bottom:12px;">
+          <span style="background:#2e1065; color:#c4b5fd; font-size:11px; font-weight:700; padding:3px 10px; border-radius:20px;">AGENT ORANGE — KOREAN DMZ</span>
+        </div>
+        <p style="font-size:13px; color:var(--muted); margin-bottom:16px; line-height:1.7;">
+          Agent Orange and other herbicides were used along the Korean DMZ. Veterans who served there during this window have presumptive exposure.
+          Same full list of Agent Orange presumptive conditions applies.
+        </p>
+        <div class="pact-action">
+          <strong>Next step:</strong> File for any Agent Orange presumptive condition. Your DD-214 must show service in Korea during the qualifying dates. A buddy statement confirming DMZ duty area can strengthen the claim.
+        </div>
+      </div>
+    </div>
+
+    <!-- C-123 -->
+    <div class="pact-result" data-key="agent_orange_c123" style="display:none;">
+      <div class="card" style="border-color:#fb923c; margin-bottom:16px;">
+        <div style="display:flex; align-items:center; gap:10px; border-color:#fb923c; margin-bottom:12px;">
+          <span style="background:#431407; color:#fdba74; font-size:11px; font-weight:700; padding:3px 10px; border-radius:20px;">AGENT ORANGE — C-123 AIRCRAFT</span>
+        </div>
+        <p style="font-size:13px; color:var(--muted); margin-bottom:16px; line-height:1.7;">
+          C-123 aircraft used to spray Agent Orange remained contaminated for years. Veterans who flew on or maintained these aircraft after the Vietnam War are now presumed to have been exposed.
+        </p>
+        <div class="pact-action">
+          <strong>Next step:</strong> File for any Agent Orange presumptive condition. You'll need service records showing your unit, aircraft tail numbers, and dates of service with those aircraft. If records are unavailable, request them from the National Personnel Records Center.
+        </div>
+      </div>
+    </div>
+
+    <!-- Camp Lejeune -->
+    <div class="pact-result" data-key="camp_lejeune" style="display:none;">
+      <div class="card" style="border-color:#60a5fa; margin-bottom:16px;">
+        <div style="display:flex; align-items:center; gap:10px; margin-bottom:12px;">
+          <span style="background:#0c1a3d; color:#93c5fd; font-size:11px; font-weight:700; padding:3px 10px; border-radius:20px;">CAMP LEJEUNE WATER CONTAMINATION</span>
+        </div>
+        <p style="font-size:13px; color:var(--muted); margin-bottom:16px; line-height:1.7;">
+          The water supply at Camp Lejeune was contaminated with volatile organic compounds (TCE, PCE, benzene, vinyl chloride) for over 30 years. This includes family members who lived on base.
+        </p>
+        <div class="card-title" style="font-size:14px;">Presumptive Conditions</div>
+        <ul class="pact-list">
+          <li>Bladder cancer</li>
+          <li>Kidney cancer</li>
+          <li>Liver cancer</li>
+          <li>Non-Hodgkin's lymphoma</li>
+          <li>Adult leukemia</li>
+          <li>Multiple myeloma</li>
+          <li>Parkinson's disease</li>
+          <li>Neurobehavioral effects</li>
+          <li>Renal toxicity</li>
+          <li>Female infertility</li>
+          <li>Scleroderma</li>
+          <li>Miscarriage</li>
+          <li>Hepatic steatosis</li>
+        </ul>
+        <div class="pact-action">
+          <strong>Next step:</strong> File a VA disability claim AND consider a Camp Lejeune Justice Act lawsuit (separate civil claim).
+          Veterans, family members, and civilians who were exposed for 30+ days may be eligible.
+          Use housing records, orders, or base rosters to document your time there.
+        </div>
+      </div>
+    </div>
+
+    <!-- Radiation -->
+    <div class="pact-result" data-key="radiation" style="display:none;">
+      <div class="card" style="border-color:#f59e0b; margin-bottom:16px;">
+        <div style="display:flex; align-items:center; gap:10px; margin-bottom:12px;">
+          <span style="background:#3d1a00; color:#fcd34d; font-size:11px; font-weight:700; padding:3px 10px; border-radius:20px;">IONIZING RADIATION EXPOSURE</span>
+        </div>
+        <p style="font-size:13px; color:var(--muted); margin-bottom:16px; line-height:1.7;">
+          Veterans who participated in nuclear weapons testing, occupied Hiroshima or Nagasaki after WWII, or were POWs in Japan may have been exposed to ionizing radiation.
+        </p>
+        <div class="card-title" style="font-size:14px;">Presumptive Cancers</div>
+        <ul class="pact-list">
+          <li>All cancers (except chronic lymphocytic leukemia) are presumptive for qualifying radiation veterans</li>
+          <li>Leukemia (other than CLL)</li>
+          <li>Thyroid cancer</li>
+          <li>Breast cancer</li>
+          <li>Lung cancer</li>
+          <li>Bone cancer</li>
+          <li>Liver cancer</li>
+          <li>Skin cancer (melanoma)</li>
+          <li>Esophageal cancer</li>
+          <li>Stomach cancer</li>
+          <li>Colon cancer</li>
+          <li>Urinary tract cancers</li>
+          <li>Salivary gland cancer</li>
+          <li>Multiple myeloma</li>
+          <li>Lymphomas (non-Hodgkin's, Hodgkin's)</li>
+        </ul>
+        <div class="pact-action">
+          <strong>Next step:</strong> Request a Radiation Dose Assessment from the VA (they estimate your exposure dose). File using VA Form 21-526EZ. The DTRA (Defense Threat Reduction Agency) maintains records of nuclear test participants — request your records there if service records are incomplete.
+        </div>
+      </div>
+    </div>
+
+    <!-- Gulf War -->
+    <div class="pact-result" data-key="gulf_war" style="display:none;">
+      <div class="card" style="border-color:#fbbf24; margin-bottom:16px;">
+        <div style="display:flex; align-items:center; gap:10px; margin-bottom:12px;">
+          <span style="background:#3d2a00; color:#fde68a; font-size:11px; font-weight:700; padding:3px 10px; border-radius:20px;">GULF WAR ILLNESS</span>
+        </div>
+        <p style="font-size:13px; color:var(--muted); margin-bottom:16px; line-height:1.7;">
+          Gulf War veterans suffer from a range of medically unexplained chronic symptoms collectively called Gulf War Illness. The VA presumes these are service-connected — no nexus letter, no diagnosed cause required.
+        </p>
+        <div class="card-title" style="font-size:14px;">Presumptive Conditions</div>
+        <ul class="pact-list">
+          <li>Medically unexplained chronic multisymptom illness (chronic fatigue, fibromyalgia, functional gastrointestinal disorders)</li>
+          <li>Chronic fatigue syndrome</li>
+          <li>Fibromyalgia</li>
+          <li>Functional gastrointestinal disorders (IBS, functional dyspepsia)</li>
+          <li>Undiagnosed illnesses with symptoms present to a degree of 10% or more</li>
+          <li>Infectious diseases: brucellosis, campylobacter jejuni, coxiella burnetii, malaria, mycobacterium tuberculosis, nontyphoid salmonella, shigella, visceral leishmaniasis, West Nile virus</li>
+        </ul>
+        <div class="pact-action">
+          <strong>Next step:</strong> File for any of these conditions. The key requirement is that symptoms began during active duty or within 10 years of service in the Southwest Asia theater, and are present to at least 10% disability level.
+          Symptoms don't need a formal diagnosis — document them with medical records and a personal statement.
+        </div>
+      </div>
+    </div>
+
+    <!-- Retroactive callout (shows if any box is checked) -->
+    <div class="pact-result pact-retro" id="retroCallout" style="display:none;">
+      <div class="card" style="border-color:var(--success); background:rgba(35,134,54,0.06);">
+        <div class="card-title" style="color:#3fb950;">Previously Denied? PACT Act Is Retroactive.</div>
+        <p style="font-size:13px; color:var(--muted); line-height:1.7; margin-bottom:12px;">
+          If you were denied for a condition that is now presumptive under the PACT Act, you can file a
+          <strong style="color:var(--text);">Supplemental Claim (VA Form 20-0995)</strong> with "PACT Act" as the new and relevant evidence.
+          The VA is required to re-adjudicate under the new law.
+        </p>
+        <p style="font-size:13px; color:var(--muted); line-height:1.7; margin:0;">
+          If approved, benefits may be paid back to the date of your original claim or August 10, 2022 — whichever is later.
+          Get a VSO to help file.
+          <a href="/vso">Find a VSO →</a>
+        </p>
+      </div>
+    </div>
+
+  </div><!-- /results -->
+</div>
+
+<style>
+.pact-check {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--border);
+  cursor: pointer;
+  transition: background 0.1s;
+}
+.pact-check:last-child { border-bottom: none; }
+.pact-check:hover { background: rgba(255,255,255,0.02); margin: 0 -24px; padding: 14px 24px; }
+.pact-check input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  margin-top: 2px;
+  flex-shrink: 0;
+  accent-color: var(--accent);
+  cursor: pointer;
+}
+.pact-label { font-weight: 600; font-size: 14px; margin-bottom: 3px; }
+.pact-sub   { font-size: 12px; color: var(--muted); line-height: 1.5; }
+
+.pact-list {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 16px 0;
+}
+.pact-list li {
+  padding: 5px 0;
+  font-size: 13px;
+  color: var(--muted);
+  border-bottom: 1px solid rgba(48,54,61,0.5);
+  padding-left: 16px;
+  position: relative;
+  line-height: 1.5;
+}
+.pact-list li::before {
+  content: '·';
+  position: absolute;
+  left: 4px;
+  color: var(--accent);
+  font-weight: 700;
+}
+.pact-list li:last-child { border-bottom: none; }
+
+.pact-action {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 12px 14px;
+  font-size: 13px;
+  color: var(--muted);
+  line-height: 1.7;
+}
+</style>
+
+<script>
+const checks    = document.querySelectorAll('#checks input[type="checkbox"]');
+const noResults = document.getElementById('noResults');
+const retro     = document.getElementById('retroCallout');
+
+checks.forEach(cb => cb.addEventListener('change', update));
+
+function update() {
+  const checked = Array.from(checks).filter(c => c.checked).map(c => c.value);
+
+  // Show/hide no-results placeholder
+  noResults.style.display = checked.length === 0 ? 'block' : 'none';
+
+  // Show/hide each result card
+  document.querySelectorAll('.pact-result[data-key]').forEach(el => {
+    el.style.display = checked.includes(el.dataset.key) ? 'block' : 'none';
+  });
+
+  // Show retroactive callout if anything is checked
+  retro.style.display = checked.length > 0 ? 'block' : 'none';
+}
+</script>
+
+{% endblock %}
