@@ -158,6 +158,105 @@
 </div>
 {% endif %}
 
+{% if claim.status == 'decision_made' %}
+<!-- Appeal Pathway Tracker -->
+<div class="card" style="margin-top:16px;">
+  <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:8px; margin-bottom:14px;">
+    <div>
+      <div class="card-title" style="margin-bottom:2px;">Appeal Pathway</div>
+      <div style="font-size:13px; color:var(--muted);">Track which appeal lane you filed and where it stands.</div>
+    </div>
+    {% if claim.appeal_type %}
+    <span style="font-size:12px; font-weight:600; padding:4px 10px; border-radius:20px;
+      background:{% if claim.appeal_status == 'decided' or claim.appeal_status == 'granted' %}#0d2d1a{% elif claim.appeal_status == 'remanded' %}#2d2009{% else %}#1a2332{% endif %};
+      color:{% if claim.appeal_status == 'decided' or claim.appeal_status == 'granted' %}#3fb950{% elif claim.appeal_status == 'remanded' %}#d29922{% else %}var(--accent){% endif %};">
+      {{ claim.appeal_status|replace('_',' ')|title }}
+    </span>
+    {% endif %}
+  </div>
+
+  {% if claim.appeal_type %}
+  <!-- Appeal is filed — show summary + status update form -->
+  <div style="background:var(--bg); border:1px solid var(--border); border-radius:6px; padding:14px 16px; margin-bottom:16px;">
+    <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:12px; font-size:13px;">
+      <div>
+        <div style="color:var(--muted); font-size:11px; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:3px;">Appeal type</div>
+        <div style="font-weight:600;">{{ claim.appeal_type|replace('_',' ')|title }}</div>
+      </div>
+      {% if claim.appeal_filed_date %}
+      <div>
+        <div style="color:var(--muted); font-size:11px; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:3px;">Filed</div>
+        <div style="font-weight:600;">{{ claim.appeal_filed_date }}</div>
+      </div>
+      {% endif %}
+      <div>
+        <div style="color:var(--muted); font-size:11px; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:3px;">Status</div>
+        <div style="font-weight:600;">{{ claim.appeal_status|replace('_','  ')|title }}</div>
+      </div>
+    </div>
+  </div>
+
+  <div style="font-size:13px; font-weight:600; margin-bottom:8px;">Update appeal status</div>
+  <form method="POST" action="/claims/{{ claim.id }}/appeal" style="display:flex; flex-wrap:wrap; gap:8px; align-items:center;">
+    <input type="hidden" name="appeal_type" value="{{ claim.appeal_type }}">
+    <input type="hidden" name="appeal_filed_date" value="{{ claim.appeal_filed_date or '' }}">
+    <select name="appeal_status" class="form-control" style="width:auto; flex:1; min-width:180px;">
+      {% for s in [('filed','Filed'),('pending_review','Pending Review'),('scheduled','Hearing Scheduled'),('decided','Decided'),('granted','Granted'),('remanded','Remanded / Sent Back'),('withdrawn','Withdrawn')] %}
+      <option value="{{ s[0] }}" {{ 'selected' if claim.appeal_status == s[0] else '' }}>{{ s[1] }}</option>
+      {% endfor %}
+    </select>
+    <button type="submit" class="btn btn-secondary btn-sm">Update</button>
+  </form>
+
+  <!-- Clear appeal -->
+  <form method="POST" action="/claims/{{ claim.id }}/appeal" style="margin-top:10px;">
+    <input type="hidden" name="appeal_type" value="">
+    <input type="hidden" name="appeal_filed_date" value="">
+    <input type="hidden" name="appeal_status" value="">
+    <button type="submit" style="background:none; border:none; color:var(--muted); cursor:pointer; font-size:12px; padding:0;">✕ Clear appeal record</button>
+  </form>
+
+  {% else %}
+  <!-- No appeal filed yet — show explanation + log form -->
+  <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-bottom:20px;">
+    <div style="background:var(--bg); border:1px solid var(--border); border-radius:6px; padding:12px;">
+      <div style="font-weight:600; font-size:13px; margin-bottom:5px;">Supplemental Claim</div>
+      <div style="font-size:12px; color:var(--muted); line-height:1.6;">Submit new and relevant evidence the VA didn't previously consider. Fastest lane — average 125 days. Preserves effective date if filed within 1 year.</div>
+    </div>
+    <div style="background:var(--bg); border:1px solid var(--border); border-radius:6px; padding:12px;">
+      <div style="font-weight:600; font-size:13px; margin-bottom:5px;">Higher-Level Review</div>
+      <div style="font-size:12px; color:var(--muted); line-height:1.6;">Senior VA rater reviews the same evidence for errors in law or fact. No new evidence allowed. Average 125 days. Good if the VA made a clear mistake.</div>
+    </div>
+    <div style="background:var(--bg); border:1px solid var(--border); border-radius:6px; padding:12px;">
+      <div style="font-weight:600; font-size:13px; margin-bottom:5px;">BVA Appeal</div>
+      <div style="font-size:12px; color:var(--muted); line-height:1.6;">Board of Veterans' Appeals judge reviews the case. Three lanes: direct review, evidence submission, or hearing. Can take 1–5 years but has broader authority.</div>
+    </div>
+  </div>
+
+  <div style="font-size:13px; font-weight:600; margin-bottom:8px;">Log your appeal filing</div>
+  <form method="POST" action="/claims/{{ claim.id }}/appeal" style="display:flex; flex-wrap:wrap; gap:8px; align-items:flex-end;">
+    <div style="flex:1; min-width:180px;">
+      <div style="font-size:12px; color:var(--muted); margin-bottom:4px;">Appeal type</div>
+      <select name="appeal_type" class="form-control">
+        <option value="">— select —</option>
+        <option value="supplemental_claim">Supplemental Claim</option>
+        <option value="higher_level_review">Higher-Level Review (HLR)</option>
+        <option value="bva_direct">BVA — Direct Review</option>
+        <option value="bva_evidence">BVA — Evidence Submission</option>
+        <option value="bva_hearing">BVA — Hearing Request</option>
+      </select>
+    </div>
+    <div>
+      <div style="font-size:12px; color:var(--muted); margin-bottom:4px;">Date filed</div>
+      <input type="date" name="appeal_filed_date" class="form-control" style="width:auto;">
+    </div>
+    <input type="hidden" name="appeal_status" value="filed">
+    <button type="submit" class="btn btn-primary btn-sm" style="align-self:flex-end;">Log Appeal</button>
+  </form>
+  {% endif %}
+</div>
+{% endif %}
+
 <!-- Journal -->
 <div class="card" style="margin-top:16px;">
   <div class="card-title">Journal</div>

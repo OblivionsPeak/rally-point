@@ -114,6 +114,21 @@ def toggle_doc(claim_id, doc_id):
     return redirect(url_for('claims.view_claim', claim_id=claim_id))
 
 
+@bp.post('/claims/<claim_id>/appeal')
+@login_required
+def update_appeal(claim_id):
+    user_id = session['user']['id']
+    appeal_type       = request.form.get('appeal_type', '').strip()
+    appeal_filed_date = request.form.get('appeal_filed_date') or None
+    appeal_status     = request.form.get('appeal_status', 'filed').strip()
+    svc_client.table('claims').update({
+        'appeal_type':       appeal_type or None,
+        'appeal_filed_date': appeal_filed_date,
+        'appeal_status':     appeal_status if appeal_type else None,
+    }).eq('id', claim_id).eq('user_id', user_id).execute()
+    return redirect(url_for('claims.view_claim', claim_id=claim_id))
+
+
 @bp.post('/claims/<claim_id>/notes')
 @login_required
 def add_note(claim_id):
