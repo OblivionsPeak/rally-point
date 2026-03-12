@@ -23,7 +23,7 @@ def login():
         session['access_token'] = res.session.access_token
         return redirect(url_for('dashboard.home'))
     except Exception as e:
-        flash('Invalid email or password. Please try again.')
+        flash('Invalid email or password. Please try again.', 'danger')
         return render_template('login.html', email=email)
 
 
@@ -41,20 +41,19 @@ def signup():
     confirm  = request.form.get('confirm', '')
 
     if password != confirm:
-        flash('Passwords do not match.')
+        flash('Passwords do not match.', 'danger')
         return render_template('signup.html', email=email)
     if len(password) < 8:
-        flash('Password must be at least 8 characters.')
+        flash('Password must be at least 8 characters.', 'danger')
         return render_template('signup.html', email=email)
 
     try:
         res = anon_client.auth.sign_up({'email': email, 'password': password})
-        # Auto sign-in after signup
         session['user']         = {'id': res.user.id, 'email': res.user.email}
         session['access_token'] = res.session.access_token if res.session else None
         return redirect(url_for('dashboard.onboarding'))
     except Exception as e:
-        flash('Could not create account. That email may already be registered.')
+        flash('Could not create account. That email may already be registered.', 'danger')
         return render_template('signup.html', email=email)
 
 
@@ -87,7 +86,7 @@ def forgot_send():
             )
         except Exception:
             pass  # Don't reveal whether email exists
-    flash("If that email is registered, you'll receive a reset link shortly. Check your inbox.")
+    flash("If that email is registered, you'll receive a reset link shortly. Check your inbox.", 'info')
     return redirect(url_for('auth.forgot_page'))
 
 
@@ -103,21 +102,21 @@ def reset_do():
     confirm = request.form.get('confirm_password', '')
 
     if not token:
-        flash('Invalid or expired reset link. Please request a new one.')
+        flash('Invalid or expired reset link. Please request a new one.', 'danger')
         return redirect(url_for('auth.forgot_page'))
     if new_pw != confirm:
-        flash('Passwords do not match.')
+        flash('Passwords do not match.', 'danger')
         return redirect(url_for('auth.reset_page'))
     if len(new_pw) < 8:
-        flash('Password must be at least 8 characters.')
+        flash('Password must be at least 8 characters.', 'danger')
         return redirect(url_for('auth.reset_page'))
 
     try:
         user_resp = anon_client.auth.get_user(token)
         user_id   = user_resp.user.id
         svc_client.auth.admin.update_user_by_id(user_id, {'password': new_pw})
-        flash('Password updated. Please log in with your new password.')
+        flash('Password updated. Please log in with your new password.', 'success')
         return redirect(url_for('auth.login_page'))
     except Exception:
-        flash('Reset link is invalid or has expired. Please request a new one.')
+        flash('Reset link is invalid or has expired. Please request a new one.', 'danger')
         return redirect(url_for('auth.forgot_page'))

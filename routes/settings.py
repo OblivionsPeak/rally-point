@@ -26,7 +26,7 @@ def update_profile():
         'service_end':    request.form.get('service_end') or None,
         'current_rating': request.form.get('current_rating') or None,
     }).execute()
-    flash('Profile updated.')
+    flash('Profile updated.', 'success')
     return redirect(url_for('settings.settings'))
 
 
@@ -36,17 +36,17 @@ def change_password():
     new_pw  = request.form.get('new_password', '')
     confirm = request.form.get('confirm_password', '')
     if new_pw != confirm:
-        flash('Passwords do not match.')
+        flash('Passwords do not match.', 'danger')
         return redirect(url_for('settings.settings'))
     if len(new_pw) < 8:
-        flash('Password must be at least 8 characters.')
+        flash('Password must be at least 8 characters.', 'danger')
         return redirect(url_for('settings.settings'))
     try:
         token = session.get('access_token')
         anon_client.auth.update_user({'password': new_pw})
-        flash('Password updated successfully.')
+        flash('Password updated successfully.', 'success')
     except Exception as e:
-        flash(f'Could not update password: {e}')
+        flash(f'Could not update password: {e}', 'danger')
     return redirect(url_for('settings.settings'))
 
 
@@ -61,5 +61,5 @@ def delete_account():
         session.clear()
         return redirect(url_for('index'))
     except Exception as e:
-        flash(f'Could not delete account: {e}')
+        flash(f'Could not delete account: {e}', 'danger')
         return redirect(url_for('settings.settings'))
