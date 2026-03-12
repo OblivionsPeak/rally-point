@@ -70,7 +70,7 @@
   </p>
   <div class="chat-container" id="chat">
     <div class="chat-messages" id="chatMessages">
-      <div class="chat-msg assistant">Hi. I'm Rally Point. Ask me anything about the VA claims process — denials, evidence, exams, secondary conditions, appeals. What's on your mind?</div>
+      <div class="chat-msg assistant" id="welcomeMsg">Hi. I'm Rally Point. Ask me anything about your VA claims — denials, evidence, exams, secondary conditions, or appeals. What's on your mind?</div>
     </div>
     <div class="chat-input-row">
       <input type="text" class="form-control" id="chatInput" placeholder="Ask a question...">
@@ -81,6 +81,57 @@
 
 <script>
 const history = [];
+
+// Build personalized context from this veteran's profile and claims
+const profileData = {{ (profile or {}) | tojson }};
+const claimsData  = {{ claims | tojson }};
+
+function buildContext() {
+  const lines = [];
+
+  // Profile summary
+  const parts = [];
+  if (profileData.branch)         parts.push(profileData.branch);
+  if (profileData.discharge_type) parts.push(profileData.discharge_type + ' discharge');
+  if (profileData.service_start && profileData.service_end)
+    parts.push('served ' + profileData.service_start.slice(0,4) + '–' + profileData.service_end.slice(0,4));
+  else if (profileData.service_start)
+    parts.push('service from ' + profileData.service_start.slice(0,4));
+  if (profileData.current_rating) parts.push('current VA rating ' + profileData.current_rating + '%');
+  if (parts.length) lines.push('Veteran profile: ' + parts.join(', ') + '.');
+
+  // Claims summary
+  if (claimsData.length) {
+    lines.push('Tracked claims:');
+    claimsData.forEach(c => {
+      let line = '- ' + c.condition + ' (' + c.claim_type.replace(/_/g,' ') + '): ' + c.status.replace(/_/g,' ');
+      if (c.rating) line += ', rated ' + c.rating + '%';
+      if (c.deadline_days !== undefined && c.deadline_date) {
+        if (c.deadline_urgency === 'expired') {
+          line += ', appeal deadline has PASSED';
+        } else {
+          line += ', appeal deadline ' + c.deadline_date + ' (' + c.deadline_days + ' days left)';
+        }
+      }
+      lines.push(line);
+    });
+  } else {
+    lines.push('The veteran has not added any claims yet.');
+  }
+
+  return lines.join('\n');
+}
+
+// Personalise the welcome message once we know claim count
+(function() {
+  const el = document.getElementById('welcomeMsg');
+  if (claimsData.length === 0) return;
+  const names = claimsData.map(c => c.condition);
+  const list  = names.length <= 2 ? names.join(' and ') : names.slice(0,-1).join(', ') + ', and ' + names[names.length-1];
+  el.textContent = "Hi. I can see you're tracking " + list + ". Ask me anything about those claims — evidence, C&P exams, appeals, or secondary conditions you may qualify for.";
+})();
+
+const claimContext = buildContext();
 
 async function sendMessage() {
   const input = document.getElementById('chatInput');
@@ -96,7 +147,7 @@ async function sendMessage() {
     const res = await fetch('/api/assistant', {
       method: 'POST',
       headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({ message: msg, history }),
+      body: JSON.stringify({ message: msg, history, context: claimContext }),
     });
     const data = await res.json();
     thinking.textContent = data.reply || data.error || 'Something went wrong.';
