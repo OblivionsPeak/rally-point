@@ -1,0 +1,227 @@
+{% extends "base.html" %}
+{% block title %}Combined Rating Calculator — Rally Point{% endblock %}
+{% block content %}
+
+<div class="page-header">
+  <h1>Combined Rating Calculator</h1>
+  <p>VA math is not additive. A 70% + 50% does not equal 120% — it equals 85% (rounded to 90%). Enter your ratings below to see how they combine.</p>
+</div>
+
+<div style="display:grid; grid-template-columns:1fr 1fr; gap:20px; align-items:start;">
+
+  <!-- Left: Input -->
+  <div class="card" style="margin-bottom:0;">
+    <div class="card-title">Your Disability Ratings</div>
+    <p style="font-size:13px; color:var(--muted); margin-bottom:20px;">
+      Enter each rated condition. The calculator sorts them highest-to-lowest automatically.
+    </p>
+
+    <div id="ratingRows" style="display:flex; flex-direction:column; gap:10px;">
+      <!-- Rows injected by JS -->
+    </div>
+
+    <button onclick="addRow()" class="btn btn-secondary" style="margin-top:14px; width:100%;">+ Add Condition</button>
+
+    <div style="margin-top:20px; padding-top:16px; border-top:1px solid var(--border);">
+      <div style="font-size:12px; color:var(--muted); line-height:1.7;">
+        <strong style="color:var(--text);">Valid ratings:</strong> 0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100<br>
+        The VA only assigns ratings in 10% increments (except 0%). Enter the exact rating from your decision letter.
+      </div>
+    </div>
+  </div>
+
+  <!-- Right: Result -->
+  <div>
+    <!-- Result card -->
+    <div class="card" style="margin-bottom:16px; text-align:center;">
+      <div style="font-size:13px; color:var(--muted); margin-bottom:8px;">Combined Rating</div>
+      <div id="resultRaw" style="font-size:64px; font-weight:800; color:var(--accent); line-height:1;">—</div>
+      <div id="resultLabel" style="font-size:14px; color:var(--muted); margin-top:6px;"></div>
+    </div>
+
+    <!-- P&T callout -->
+    <div id="ptCallout" style="display:none;" class="card" style="margin-bottom:16px; border-color:var(--success); background:rgba(35,134,54,0.06);">
+      <div style="font-weight:700; color:#3fb950; margin-bottom:6px;">100% — Check P&amp;T Eligibility</div>
+      <p style="font-size:13px; color:var(--muted); line-height:1.7; margin:0;">
+        At 100% combined, you may qualify for <strong style="color:var(--text);">Permanent &amp; Total (P&amp;T)</strong> status,
+        which locks in your rating and opens additional benefits: Chapter 35 DEA education for dependents,
+        property tax exemptions (varies by state), CHAMPVA healthcare for dependents, and more.
+        Ask your VSO about applying for P&amp;T if you're not already designated.
+      </p>
+    </div>
+
+    <!-- TDIU callout -->
+    <div id="tdiuCallout" style="display:none;" class="card" style="margin-bottom:16px; border-color:var(--warning); background:rgba(210,153,34,0.06);">
+      <div style="font-weight:700; color:var(--warning); margin-bottom:6px;">Consider TDIU (Individual Unemployability)</div>
+      <p style="font-size:13px; color:var(--muted); line-height:1.7; margin:0;">
+        If your disabilities prevent you from holding substantially gainful employment,
+        you may qualify for <strong style="color:var(--text);">Total Disability Individual Unemployability (TDIU)</strong>
+        — which pays at the 100% rate even if your combined rating is lower.
+        Basic threshold: one disability at 60%+ OR combined rating of 70%+ with at least one disability at 40%+.
+      </p>
+    </div>
+
+    <!-- Step-by-step breakdown -->
+    <div class="card" style="margin-bottom:0;">
+      <div class="card-title">How It's Calculated</div>
+      <div id="breakdown" style="font-size:13px; color:var(--muted); line-height:1.9;">
+        <p>Add at least one rating to see the breakdown.</p>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Explainer -->
+<div class="card" style="margin-top:20px;">
+  <div class="card-title">Why VA Math Works This Way</div>
+  <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(220px, 1fr)); gap:20px; font-size:13px; color:var(--muted); line-height:1.7;">
+    <div>
+      <strong style="color:var(--text); display:block; margin-bottom:4px;">The Whole Person Method</strong>
+      The VA treats you as a "whole person" (100%). Your highest disability takes a percentage of that whole person.
+      Each subsequent disability takes its percentage of what's <em>left</em> — not of 100%.
+    </div>
+    <div>
+      <strong style="color:var(--text); display:block; margin-bottom:4px;">Rounding to Nearest 10%</strong>
+      After combining, the VA rounds to the nearest 10%. Values ending in 1–4 round down; 5–9 round up.
+      So a combined value of 85% rounds to 90%, while 84% rounds to 80%.
+    </div>
+    <div>
+      <strong style="color:var(--text); display:block; margin-bottom:4px;">Order Matters</strong>
+      Ratings are always applied highest-to-lowest. This maximizes the benefit — applying a smaller rating first
+      would leave less "whole person" for the larger one to work against.
+    </div>
+    <div>
+      <strong style="color:var(--text); display:block; margin-bottom:4px;">Bilateral Factor</strong>
+      If you have disabilities affecting both arms or both legs (bilateral), a 10% bonus is added before
+      the final combination. This calculator does not include the bilateral factor — note it if it applies to you.
+    </div>
+  </div>
+</div>
+
+<script>
+let rowCount = 0;
+
+function addRow(defaultRating = '') {
+  rowCount++;
+  const id = rowCount;
+  const div = document.createElement('div');
+  div.id = `row-${id}`;
+  div.style.cssText = 'display:flex; gap:8px; align-items:center;';
+  div.innerHTML = `
+    <input type="text" class="form-control" placeholder="Condition name (optional)"
+           style="flex:1;" oninput="calculate()">
+    <select class="form-control" style="width:90px; flex-shrink:0;" onchange="calculate()">
+      <option value="">—</option>
+      ${[0,10,20,30,40,50,60,70,80,90,100].map(v =>
+        `<option value="${v}" ${v == defaultRating ? 'selected' : ''}>${v}%</option>`
+      ).join('')}
+    </select>
+    <button onclick="removeRow(${id})" style="background:none; border:none; color:var(--muted); cursor:pointer; font-size:18px; padding:0 4px; flex-shrink:0;" title="Remove">×</button>
+  `;
+  document.getElementById('ratingRows').appendChild(div);
+  calculate();
+}
+
+function removeRow(id) {
+  const el = document.getElementById(`row-${id}`);
+  if (el) el.remove();
+  calculate();
+}
+
+function getRatings() {
+  const rows   = document.querySelectorAll('#ratingRows > div');
+  const result = [];
+  rows.forEach(row => {
+    const name = row.querySelector('input').value.trim();
+    const val  = parseInt(row.querySelector('select').value);
+    if (!isNaN(val)) result.push({ name: name || `Condition ${result.length + 1}`, rating: val });
+  });
+  return result.sort((a, b) => b.rating - a.rating);
+}
+
+function combinedRating(ratings) {
+  let remaining = 100;
+  let combined  = 0;
+  const steps   = [];
+  for (const r of ratings) {
+    const contribution = (r.rating / 100) * remaining;
+    combined  += contribution;
+    remaining -= contribution;
+    steps.push({
+      name:         r.name,
+      rating:       r.rating,
+      contribution: contribution,
+      combined:     combined,
+      remaining:    remaining,
+    });
+  }
+  return { raw: combined, rounded: roundToTen(combined), steps };
+}
+
+function roundToTen(val) {
+  return Math.round(val / 10) * 10;
+}
+
+function calculate() {
+  const ratings = getRatings();
+  const rawEl   = document.getElementById('resultRaw');
+  const lblEl   = document.getElementById('resultLabel');
+  const brkEl   = document.getElementById('breakdown');
+  const ptEl    = document.getElementById('ptCallout');
+  const tdiuEl  = document.getElementById('tdiuCallout');
+
+  const valid = ratings.filter(r => r.rating > 0);
+
+  if (valid.length === 0) {
+    rawEl.textContent = '—';
+    lblEl.textContent = '';
+    brkEl.innerHTML   = '<p>Add at least one rating to see the breakdown.</p>';
+    ptEl.style.display   = 'none';
+    tdiuEl.style.display = 'none';
+    return;
+  }
+
+  const result = combinedRating(valid);
+
+  rawEl.textContent = result.rounded + '%';
+  rawEl.style.color = result.rounded >= 70 ? 'var(--accent)' : result.rounded >= 40 ? 'var(--warning)' : 'var(--muted)';
+
+  if (Math.abs(result.raw - result.rounded) < 0.01) {
+    lblEl.textContent = `Combined value: ${result.raw.toFixed(1)}% (no rounding needed)`;
+  } else {
+    const dir = result.rounded > result.raw ? 'up' : 'down';
+    lblEl.textContent = `Combined value: ${result.raw.toFixed(1)}% → rounded ${dir} to ${result.rounded}%`;
+  }
+
+  // Build breakdown
+  let html = '<div style="font-family:monospace; font-size:12px; background:var(--bg); border:1px solid var(--border); border-radius:6px; padding:14px; line-height:2;">';
+  html += `<div style="color:var(--text);">Start: 100% whole person</div>`;
+  result.steps.forEach((s, i) => {
+    const pct  = s.rating + '%';
+    const name = s.name.length > 22 ? s.name.substring(0, 22) + '…' : s.name;
+    html += `<div><span style="color:var(--accent);">${pct}</span> ${name}`;
+    html += `<span style="color:var(--muted);"> → +${s.contribution.toFixed(2)}%`;
+    html += ` = ${s.combined.toFixed(2)}% combined (${s.remaining.toFixed(2)}% remaining)</span></div>`;
+  });
+  html += `<div style="border-top:1px solid var(--border); margin-top:8px; padding-top:8px; color:var(--text);">`;
+  html += `Combined: <strong>${result.raw.toFixed(2)}%</strong> → rounded to <strong style="color:var(--accent);">${result.rounded}%</strong></div>`;
+  html += '</div>';
+  brkEl.innerHTML = html;
+
+  // Show/hide callouts
+  ptEl.style.display   = result.rounded >= 100 ? 'block' : 'none';
+
+  // TDIU: show if 60-99% combined, or if any single rating ≥ 60
+  const maxSingle  = valid.length ? Math.max(...valid.map(r => r.rating)) : 0;
+  const tdiuElig   = result.rounded < 100 && (maxSingle >= 60 || result.rounded >= 70);
+  tdiuEl.style.display = tdiuElig ? 'block' : 'none';
+}
+
+// Start with 3 rows
+addRow();
+addRow();
+addRow();
+</script>
+
+{% endblock %}
