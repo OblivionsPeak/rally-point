@@ -23,6 +23,7 @@ from routes.pact        import bp as pact_bp
 from routes.rating_calc import bp as rating_calc_bp
 from routes.buddy       import bp as buddy_bp
 from routes.nexus       import bp as nexus_bp
+from routes.summary     import bp as summary_bp
 
 app.register_blueprint(auth_bp)
 app.register_blueprint(dashboard_bp)
@@ -35,6 +36,7 @@ app.register_blueprint(pact_bp)
 app.register_blueprint(rating_calc_bp)
 app.register_blueprint(buddy_bp)
 app.register_blueprint(nexus_bp)
+app.register_blueprint(summary_bp)
 
 # ── Background scheduler ───────────────────────────────────────────────────────
 from reminders.scheduler import start_reminder_scheduler

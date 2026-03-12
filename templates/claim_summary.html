@@ -1,0 +1,157 @@
+{% extends "base.html" %}
+{% block title %}Claim Summary — Rally Point{% endblock %}
+{% block content %}
+
+<!-- Screen-only controls -->
+<div class="no-print" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px; flex-wrap:wrap; gap:12px;">
+  <div>
+    <a href="/dashboard" style="font-size:13px; color:var(--muted);">← Back to Dashboard</a>
+    <h1 style="font-size:26px; font-weight:700; margin-top:6px;">Claim Summary</h1>
+    <p style="font-size:14px; color:var(--muted); margin-top:2px;">Print this page and bring it to your VSO appointment.</p>
+  </div>
+  <button onclick="window.print()" class="btn btn-primary">Print / Save as PDF</button>
+</div>
+
+<!-- ══════════════════════════════════════════════ PRINT AREA ══ -->
+<div id="summaryPrint">
+
+  <!-- Header -->
+  <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:20px; padding-bottom:16px; border-bottom:2px solid var(--border);">
+    <div>
+      <div style="font-size:22px; font-weight:700; letter-spacing:-0.5px;">VA Claims Summary</div>
+      <div style="font-size:13px; color:var(--muted); margin-top:3px;">
+        Generated {{ now }} &nbsp;·&nbsp; Rally Point
+      </div>
+    </div>
+    <div style="text-align:right; font-size:13px; color:var(--muted);">
+      {{ email }}<br>
+      {% if profile.branch %}{{ profile.branch }}{% endif %}
+      {% if profile.discharge_type %} · {{ profile.discharge_type }} discharge{% endif %}
+    </div>
+  </div>
+
+  <!-- Profile bar -->
+  {% if profile.service_start or profile.current_rating %}
+  <div style="background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:12px 18px; margin-bottom:20px; display:flex; flex-wrap:wrap; gap:20px; font-size:13px;">
+    {% if profile.service_start %}
+    <div><span style="color:var(--muted);">Service:</span> <strong>{{ profile.service_start[:4] }}{% if profile.service_end %}–{{ profile.service_end[:4] }}{% endif %}</strong></div>
+    {% endif %}
+    {% if profile.branch %}
+    <div><span style="color:var(--muted);">Branch:</span> <strong>{{ profile.branch }}</strong></div>
+    {% endif %}
+    {% if profile.discharge_type %}
+    <div><span style="color:var(--muted);">Discharge:</span> <strong>{{ profile.discharge_type }}</strong></div>
+    {% endif %}
+    {% if profile.current_rating %}
+    <div><span style="color:var(--muted);">Current VA rating:</span> <strong>{{ profile.current_rating }}%</strong></div>
+    {% endif %}
+  </div>
+  {% endif %}
+
+  <!-- Claims count -->
+  <div style="font-size:13px; font-weight:600; color:var(--muted); text-transform:uppercase; letter-spacing:0.5px; margin-bottom:14px;">
+    {{ claims|length }} Claim{{ 's' if claims|length != 1 else '' }} Tracked
+  </div>
+
+  {% if not claims %}
+  <div style="color:var(--muted); font-size:14px; padding:20px 0;">No claims tracked yet.</div>
+  {% endif %}
+
+  {% for claim in claims %}
+  <div style="border:1px solid var(--border); border-radius:8px; margin-bottom:16px; overflow:hidden; page-break-inside:avoid;">
+
+    <!-- Claim header row -->
+    <div style="padding:14px 18px; display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:8px; border-bottom:1px solid var(--border);">
+      <div>
+        <div style="font-weight:700; font-size:16px;">{{ claim.condition }}</div>
+        <div style="font-size:12px; color:var(--muted); margin-top:3px;">
+          {{ claim.claim_type|replace('_',' ')|title }}
+          {% if claim.date_filed %} · Filed {{ claim.date_filed }}{% endif %}
+          {% if claim.rating %} · Rated <strong>{{ claim.rating }}%</strong>{% endif %}
+        </div>
+      </div>
+      <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+        {% if claim.deadline_urgency is defined %}
+          {% if claim.deadline_urgency == 'expired' %}
+          <span style="font-size:12px; font-weight:700; color:#fca5a5;">⚠ Appeal deadline PASSED</span>
+          {% elif claim.deadline_urgency == 'urgent' %}
+          <span style="font-size:12px; font-weight:700; color:#fca5a5;">⚠ {{ claim.deadline_days }}d left · deadline {{ claim.deadline_date }}</span>
+          {% elif claim.deadline_urgency == 'warning' %}
+          <span style="font-size:12px; font-weight:600; color:#d29922;">{{ claim.deadline_days }}d left · deadline {{ claim.deadline_date }}</span>
+          {% else %}
+          <span style="font-size:12px; color:var(--muted);">Appeal deadline: {{ claim.deadline_date }}</span>
+          {% endif %}
+        {% endif %}
+        <span class="badge badge-{{ 'review' if claim.status == 'in_review' else 'decided' if claim.status == 'decision_made' else 'closed' if claim.status == 'closed' else 'pending' }}" style="font-size:11px;">
+          {{ claim.status|replace('_',' ')|title }}
+        </span>
+      </div>
+    </div>
+
+    <!-- Evidence checklist -->
+    <div style="padding:12px 18px;">
+      {% if claim.docs %}
+      <div style="font-size:12px; font-weight:600; color:var(--muted); margin-bottom:8px; text-transform:uppercase; letter-spacing:0.4px;">
+        Evidence — {{ claim.docs_collected }}/{{ claim.docs_total }} collected
+        {% if claim.docs_collected == claim.docs_total and claim.docs_total > 0 %}
+        <span style="color:#3fb950; margin-left:6px;">✓ Complete</span>
+        {% endif %}
+      </div>
+
+      <!-- Progress bar -->
+      {% if claim.docs_total > 0 %}
+      <div style="background:var(--border); border-radius:4px; height:5px; margin-bottom:10px; overflow:hidden;">
+        <div style="background:var(--accent); height:100%; width:{{ ((claim.docs_collected / claim.docs_total) * 100)|int }}%; border-radius:4px;"></div>
+      </div>
+      {% endif %}
+
+      <div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(240px, 1fr)); gap:4px 16px;">
+        {% for doc in claim.docs %}
+        <div style="font-size:13px; display:flex; align-items:center; gap:6px; padding:2px 0;">
+          <span style="color:{{ '#3fb950' if doc.collected else 'var(--muted)' }}; font-size:14px; flex-shrink:0;">{{ '✓' if doc.collected else '○' }}</span>
+          <span style="{{ '' if doc.collected else 'color:var(--muted);' }}">{{ doc.name }}</span>
+        </div>
+        {% endfor %}
+      </div>
+
+      {% else %}
+      <div style="font-size:13px; color:var(--muted);">No evidence items added.</div>
+      {% endif %}
+
+      {% if claim.notes %}
+      <div style="margin-top:10px; padding-top:10px; border-top:1px solid var(--border); font-size:13px; color:var(--muted);">
+        <strong style="color:var(--text);">Notes:</strong> {{ claim.notes }}
+      </div>
+      {% endif %}
+    </div>
+
+  </div>
+  {% endfor %}
+
+  <!-- Footer -->
+  <div style="margin-top:24px; padding-top:14px; border-top:1px solid var(--border); font-size:12px; color:var(--muted); display:flex; justify-content:space-between; flex-wrap:wrap; gap:8px;">
+    <div>Rally Point — VA Benefits Companion &nbsp;·&nbsp; rally-point.app</div>
+    <div>Not legal advice. Verify important decisions with a VSO.</div>
+  </div>
+
+</div>
+<!-- ══════════════════════════════════════════════════════════════ -->
+
+<style>
+  @media print {
+    .no-print { display: none !important; }
+    body { background: #fff !important; }
+    .navbar, .nav-drawer { display: none !important; }
+    .main-content { padding: 20px 32px !important; }
+    .card { break-inside: avoid; }
+    #summaryPrint { color: #111; }
+    #summaryPrint .badge { border: 1px solid #ccc !important; background: #f5f5f5 !important; color: #333 !important; }
+    #summaryPrint [style*="var(--border)"] { border-color: #ddd !important; }
+    #summaryPrint [style*="var(--muted)"]  { color: #555 !important; }
+    #summaryPrint [style*="var(--surface)"] { background: #fafafa !important; }
+    #summaryPrint [style*="var(--accent)"] { background: #2563eb !important; }
+    #summaryPrint [style*="var(--text)"]   { color: #111 !important; }
+  }
+</style>
+
+{% endblock %}

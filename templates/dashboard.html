@@ -11,7 +11,10 @@
       {{ claims|length }} claim{{ 's' if claims|length != 1 else '' }} tracked
     </p>
   </div>
-  <a href="/claims/new" class="btn btn-primary">+ New Claim</a>
+  <div style="display:flex; gap:10px; flex-wrap:wrap;">
+    <a href="/claims/new" class="btn btn-primary">+ New Claim</a>
+    {% if claims %}<a href="/summary" class="btn btn-secondary">Print Summary</a>{% endif %}
+  </div>
 </div>
 
 {% if not claims %}
