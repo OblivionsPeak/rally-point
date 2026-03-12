@@ -26,6 +26,10 @@ app.register_blueprint(assistant_bp)
 app.register_blueprint(cpep_bp)
 app.register_blueprint(settings_bp)
 
+# ── Background scheduler ───────────────────────────────────────────────────────
+from reminders.scheduler import start_reminder_scheduler
+start_reminder_scheduler()
+
 
 @app.get('/')
 def index():
