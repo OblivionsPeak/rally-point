@@ -1,0 +1,130 @@
+{% extends "base.html" %}
+{% block title %}Effective Dates Guide — Rally Point{% endblock %}
+{% block content %}
+
+<div style="max-width:820px; margin:0 auto;">
+
+  <a href="/dashboard" style="font-size:13px; color:var(--muted);">← Back to Dashboard</a>
+  <h1 style="font-size:26px; font-weight:700; margin-top:8px; margin-bottom:4px;">Effective Dates</h1>
+  <p style="font-size:14px; color:var(--muted); margin-bottom:28px;">
+    Your effective date determines how far back VA pays you — it's the difference between months and years of back pay.
+    Understanding how effective dates work is one of the most financially significant parts of VA claims.
+  </p>
+
+  <!-- Why it matters banner -->
+  <div style="background:linear-gradient(135deg,#1a2d4a,#1a3a2a); border:1px solid #2d4a6b; border-radius:10px; padding:20px 24px; margin-bottom:28px;">
+    <div style="font-weight:700; font-size:15px; margin-bottom:10px; color:#3fb950;">Why effective dates matter: a real example</div>
+    <div style="font-size:13px; color:var(--muted); line-height:1.8;">
+      A veteran files a claim on <strong style="color:var(--text);">January 1, 2020</strong> for a knee condition.
+      VA takes two years to decide and grants 30% effective <strong style="color:var(--text);">January 1, 2020</strong> — the filing date.
+      At 30% (single, no dependents), that's roughly <strong style="color:var(--text);">$524/month</strong>.
+      Two years of back pay = <strong style="color:var(--text);">~$12,576 in a lump sum</strong> on top of ongoing benefits.
+      <br><br>
+      If the veteran had waited to file — or if VA incorrectly set the effective date to the decision date — that $12,576 disappears.
+      <span style="font-size:11px; opacity:0.7;">(2024 rates, illustrative only)</span>
+    </div>
+  </div>
+
+  <!-- General rule -->
+  <div class="card" style="margin-bottom:20px; border-color:var(--accent);">
+    <div class="card-title" style="color:var(--accent);">The General Rule</div>
+    <p style="font-size:14px; color:var(--muted); line-height:1.7; margin:0;">
+      Your effective date is the <strong style="color:var(--text);">day VA receives your claim</strong> — or the day you become entitled to the benefit, whichever is later.
+      For most veterans, this is simply the date your application was stamped received at a VA regional office or submitted on VA.gov.
+      <br><br>
+      <strong style="color:var(--text);">This is why filing immediately matters.</strong> Even if your claim takes 18 months to decide, your back pay runs from the filing date, not the decision date.
+    </p>
+  </div>
+
+  <!-- Exceptions that help you -->
+  <div class="card" style="margin-bottom:20px;">
+    <div class="card-title">Exceptions That Can Move Your Date Earlier</div>
+    <div style="display:flex; flex-direction:column; gap:0;">
+      {% for item in [
+        ('1-Year Intent to File (ITF)', 'If you submit an Intent to File before your formal claim, your effective date can go back to the ITF date — up to one year before the actual application. Filing an ITF is free and takes minutes on VA.gov. <strong style="color:var(--text);">Always file an ITF before you start gathering evidence.</strong>'),
+        ('1-Year from Separation', 'If you file within one year of separating from active duty, your effective date can be the day after your date of discharge — not just the filing date. This is one of the most valuable windows for transitioning veterans.'),
+        ('Continuous Pursuit (CUE)', 'If VA made a clear and unmistakable error (CUE) in a prior final decision — misread the evidence, applied the wrong law, or ignored a regulation — you can challenge the old decision and potentially get an earlier effective date going back years or decades. CUE claims are hard to win but can be worth enormous back pay.'),
+        ('Reopened Claim with New Evidence', 'If VA previously denied your claim, you can reopen it with new and relevant evidence (Supplemental Claim). The new effective date will be the date of the new filing — not the original denial. File the Supplemental Claim as soon as you have new evidence.'),
+        ('Increase Already Warranted', 'In some situations, if the medical evidence shows your condition warranted a higher rating before you applied for an increase, VA can assign an effective date earlier than the application — typically the date the evidence shows the increase was warranted.')
+      ] %}
+      <div style="padding:14px 0; border-bottom:1px solid var(--border);">
+        <div style="font-weight:600; font-size:14px; margin-bottom:5px;">{{ item[0] }}</div>
+        <div style="font-size:13px; color:var(--muted); line-height:1.6;">{{ item[1]|safe }}</div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- Intent to File walkthrough -->
+  <div class="card" style="margin-bottom:20px;">
+    <div class="card-title">How to File an Intent to File (ITF)</div>
+    <p style="font-size:13px; color:var(--muted); margin-bottom:16px; line-height:1.6;">
+      An ITF locks in your effective date for up to 12 months while you gather evidence. It costs nothing and takes under 5 minutes.
+      You must complete and submit your formal claim within the 12-month window or the ITF expires.
+    </p>
+    <div style="display:flex; flex-direction:column; gap:0;">
+      {% for step in [
+        ('1', 'Go to VA.gov → File a claim online', 'Start the application process. VA automatically registers an ITF when you begin a claim on VA.gov, even if you don\'t finish it that day.'),
+        ('2', 'Or call 1-800-827-1000', 'Ask the representative to record an Intent to File for a disability compensation claim. Get the date confirmed.'),
+        ('3', 'Or submit VA Form 21-0966', 'Mail or hand-deliver the form to your nearest VA Regional Office. VSOs can submit this on your behalf.'),
+        ('4', 'Confirm your ITF date in writing', 'VA should send you a letter confirming the ITF. Save it. This date is your back-pay anchor — if it gets lost, you\'ll need proof.'),
+        ('5', 'Complete your formal claim within 12 months', 'Submit VA Form 21-526EZ before the ITF expires. If you need more time, file a new ITF (though you\'ll lose the original date).')
+      ] %}
+      <div style="display:flex; gap:16px; padding:14px 0; border-bottom:1px solid var(--border);">
+        <div style="width:28px; height:28px; border-radius:50%; background:var(--accent); color:#fff; font-weight:700; font-size:13px; display:flex; align-items:center; justify-content:center; flex-shrink:0; margin-top:1px;">{{ step[0] }}</div>
+        <div>
+          <div style="font-weight:600; font-size:14px; margin-bottom:4px;">{{ step[1] }}</div>
+          <div style="font-size:13px; color:var(--muted); line-height:1.6;">{{ step[2] }}</div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- CUE deep dive -->
+  <div class="card" style="margin-bottom:20px;">
+    <div class="card-title">Clear and Unmistakable Error (CUE)</div>
+    <p style="font-size:13px; color:var(--muted); margin-bottom:16px; line-height:1.6;">
+      CUE is the mechanism for correcting final VA decisions that contained a legal or factual error so obvious it would have changed the outcome.
+      A successful CUE claim assigns the effective date of the original erroneous decision — meaning back pay can go back 10, 20, or 30+ years.
+    </p>
+    <div style="display:flex; flex-direction:column; gap:0;">
+      {% for item in [
+        ('What qualifies as CUE', 'VA applied the wrong legal standard, failed to apply a regulation that clearly applied, or the factual record at the time of the decision showed the claim should have been granted and the VA\'s conclusion was not a plausible interpretation of the evidence. CUE is a high bar — a disagreement with how VA weighed evidence is not enough.'),
+        ('What does NOT qualify', 'New evidence discovered after the decision. A change in medical opinion. A better argument you could have made at the time. Procedural errors that didn\'t affect the outcome. Disagreement with how evidence was weighed (even if you think VA was wrong).'),
+        ('How to file a CUE claim', 'CUE is raised on appeal (to BVA) or as a motion for revision of a final decision at the Regional Office. You must specifically identify the error of law or fact, explain how it changed the outcome, and cite the regulation or record that was misapplied. Work with a VSO or accredited claims agent — CUE claims are technical and rarely win without proper framing.'),
+        ('Statute of limitations', 'There is none. You can file a CUE claim on a decades-old decision at any time. However, once a CUE motion is denied, you generally cannot raise the same CUE argument again (res judicata).')
+      ] %}
+      <div style="padding:14px 0; border-bottom:1px solid var(--border);">
+        <div style="font-weight:600; font-size:14px; margin-bottom:5px;">{{ item[0] }}</div>
+        <div style="font-size:13px; color:var(--muted); line-height:1.6;">{{ item[1] }}</div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- Common mistakes -->
+  <div class="card" style="margin-bottom:20px;">
+    <div class="card-title">Common Mistakes That Cost Veterans Back Pay</div>
+    <ul style="font-size:14px; color:var(--muted); line-height:2.2; padding-left:20px; margin:0;">
+      <li><strong style="color:var(--text);">Waiting to file until you have all your evidence</strong> — file the claim or ITF first, then gather evidence. Every day you wait costs back pay.</li>
+      <li><strong style="color:var(--text);">Not appealing within one year of a denial</strong> — after one year, the decision becomes final and an appeal no longer preserves the original effective date.</li>
+      <li><strong style="color:var(--text);">Withdrawing a claim instead of letting it be decided</strong> — a denial can be appealed; a withdrawal abandons the effective date permanently.</li>
+      <li><strong style="color:var(--text);">Missing the ITF expiration</strong> — if your ITF lapses before you file the formal claim, you lose that protected date and must start from the new filing date.</li>
+      <li><strong style="color:var(--text);">Not filing for secondary conditions at the same time</strong> — secondary conditions filed later get the new filing date, not the date of the primary condition.</li>
+      <li><strong style="color:var(--text);">Accepting the rating without checking the effective date letter</strong> — VA sometimes sets effective dates incorrectly. Always verify the date in your rating decision letter against your actual filing date.</li>
+    </ul>
+  </div>
+
+  <!-- CTA -->
+  <div style="background:#0d2d1a; border:1px solid #1a5c2a; border-radius:8px; padding:18px 20px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
+    <div>
+      <div style="font-weight:600; font-size:15px; color:#3fb950; margin-bottom:4px;">Think your effective date is wrong? Talk to a VSO.</div>
+      <div style="font-size:13px; color:var(--muted);">A VSO can review your rating decision, check whether your effective date was set correctly, and help you file a CUE motion or appeal if it wasn't — for free.</div>
+    </div>
+    <a href="/vso" class="btn btn-secondary" style="white-space:nowrap; flex-shrink:0;">Find a VSO</a>
+  </div>
+
+</div>
+
+{% endblock %}

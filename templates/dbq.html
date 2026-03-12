@@ -103,6 +103,15 @@
 <script>
 let activeCategory = 'all';
 
+// Pre-populate search from ?q= query param (used by "Find DBQ" on claim detail)
+(function() {
+  const q = new URLSearchParams(window.location.search).get('q');
+  if (q) {
+    const input = document.getElementById('dbqSearch');
+    if (input) input.value = q;
+  }
+})();
+
 function filterDBQs() {
   const query = document.getElementById('dbqSearch').value.toLowerCase().trim();
   const rows  = document.querySelectorAll('.dbq-row');
@@ -123,6 +132,9 @@ function setCategory(cat, btn) {
   btn.classList.add('active');
   filterDBQs();
 }
+
+// Run filter on load in case ?q= was set
+document.addEventListener('DOMContentLoaded', filterDBQs);
 </script>
 
 {% endblock %}
