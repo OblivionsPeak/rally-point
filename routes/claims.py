@@ -67,23 +67,34 @@ def update_status(claim_id):
     return redirect(url_for('claims.view_claim', claim_id=claim_id))
 
 
+def _touch_claim(claim_id, user_id):
+    """Bump updated_at on the claim so doc activity resets the stale reminder timer."""
+    svc_client.table('claims') \
+        .update({'updated_at': datetime.now(timezone.utc).isoformat()}) \
+        .eq('id', claim_id).eq('user_id', user_id).execute()
+
+
 @bp.post('/claims/<claim_id>/docs')
 @login_required
 def add_doc(claim_id):
+    user_id = session['user']['id']
     svc_client.table('documents').insert({
         'claim_id':  claim_id,
         'name':      request.form.get('name', '').strip(),
         'collected': False,
     }).execute()
+    _touch_claim(claim_id, user_id)
     return redirect(url_for('claims.view_claim', claim_id=claim_id))
 
 
 @bp.post('/claims/<claim_id>/docs/<doc_id>/toggle')
 @login_required
 def toggle_doc(claim_id, doc_id):
+    user_id = session['user']['id']
     doc = svc_client.table('documents').select('collected').eq('id', doc_id).maybe_single().execute()
     if doc.data:
         svc_client.table('documents').update({'collected': not doc.data['collected']}).eq('id', doc_id).execute()
+        _touch_claim(claim_id, user_id)
     return redirect(url_for('claims.view_claim', claim_id=claim_id))
 
 
