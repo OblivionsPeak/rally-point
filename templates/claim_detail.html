@@ -1,6 +1,42 @@
 {% extends "base.html" %}
 {% block title %}{{ claim.condition }} — Rally Point{% endblock %}
 {% block content %}
+
+{% if claim.deadline_urgency is defined %}
+  {% if claim.deadline_urgency == 'expired' %}
+  <div style="background:#3d0c0c; border:1px solid var(--danger); border-radius:8px; padding:14px 18px; margin-bottom:20px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+    <div>
+      <div style="font-weight:700; color:#fca5a5; font-size:15px;">⚠ Appeal deadline has passed</div>
+      <div style="font-size:13px; color:#fca5a5; margin-top:3px; opacity:0.85;">You may still file a Supplemental Claim — you'll lose the original effective date but can still receive benefits from the new filing date forward.</div>
+    </div>
+    <a href="/claims/{{ claim.id }}/denial" class="btn" style="background:var(--danger); color:#fff; white-space:nowrap; flex-shrink:0;">Appeal Options</a>
+  </div>
+  {% elif claim.deadline_urgency == 'urgent' %}
+  <div style="background:#3d0c0c; border:1px solid var(--danger); border-radius:8px; padding:14px 18px; margin-bottom:20px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+    <div>
+      <div style="font-weight:700; color:#fca5a5; font-size:15px;">⚠ {{ claim.deadline_days }} day{{ 's' if claim.deadline_days != 1 }} left to appeal — deadline {{ claim.deadline_date }}</div>
+      <div style="font-size:13px; color:#fca5a5; margin-top:3px; opacity:0.85;">File a Supplemental Claim, Higher-Level Review, or BVA Appeal before {{ claim.deadline_date }} to preserve your effective date and back pay.</div>
+    </div>
+    <a href="/claims/{{ claim.id }}/denial" class="btn" style="background:var(--danger); color:#fff; white-space:nowrap; flex-shrink:0;">Appeal Now</a>
+  </div>
+  {% elif claim.deadline_urgency == 'warning' %}
+  <div style="background:#2d2009; border:1px solid #6e4b0f; border-radius:8px; padding:14px 18px; margin-bottom:20px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+    <div>
+      <div style="font-weight:700; color:#d29922; font-size:15px;">{{ claim.deadline_days }} days left to appeal — deadline {{ claim.deadline_date }}</div>
+      <div style="font-size:13px; color:#d29922; margin-top:3px; opacity:0.85;">Contact a VSO now to start your appeal before you lose your effective date.</div>
+    </div>
+    <a href="/claims/{{ claim.id }}/denial" class="btn btn-secondary" style="white-space:nowrap; flex-shrink:0;">Review Appeal Options</a>
+  </div>
+  {% elif claim.deadline_urgency == 'safe' %}
+  <div style="background:#0d2d1a; border:1px solid #1a5c2a; border-radius:8px; padding:11px 18px; margin-bottom:20px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+    <div style="font-size:13px; color:#3fb950;">
+      Appeal deadline: <strong>{{ claim.deadline_date }}</strong> &nbsp;·&nbsp; {{ claim.deadline_days }} days remaining
+    </div>
+    <a href="/claims/{{ claim.id }}/denial" class="btn btn-secondary btn-sm" style="white-space:nowrap;">Appeal Options</a>
+  </div>
+  {% endif %}
+{% endif %}
+
 <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:24px; flex-wrap:wrap; gap:12px;">
   <div>
     <a href="/dashboard" style="font-size:13px; color:var(--muted);">← Back to Dashboard</a>
