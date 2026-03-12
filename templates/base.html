@@ -13,11 +13,17 @@
     <div class="nav-links">
       <a href="/dashboard">Dashboard</a>
       <a href="/claims/new">+ New Claim</a>
-      <a href="/rating-calc">Rating Calc</a>
-      <a href="/pact">PACT Act</a>
-      <a href="/vso">Find a VSO</a>
-      <a href="/buddy-statement">Buddy Statement</a>
-      <a href="/nexus-letter">Nexus Letter</a>
+      <div class="nav-dropdown" id="toolsDropdown">
+        <button class="nav-dropdown-toggle" onclick="toggleDropdown()">Tools</button>
+        <div class="nav-dropdown-menu">
+          <a href="/rating-calc">Rating Calculator</a>
+          <a href="/pact">PACT Act Checker</a>
+          <a href="/vso">Find a VSO</a>
+          <a href="/buddy-statement">Buddy Statement</a>
+          <a href="/nexus-letter">Nexus Letter</a>
+          <a href="/summary">Print Summary</a>
+        </div>
+      </div>
       <a href="/settings">Settings</a>
       <a href="/logout">Log Out</a>
     </div>
@@ -26,18 +32,27 @@
   <div class="nav-drawer" id="navDrawer">
     <a href="/dashboard">Dashboard</a>
     <a href="/claims/new">+ New Claim</a>
-    <a href="/rating-calc">Rating Calculator</a>
-    <a href="/pact">PACT Act</a>
-    <a href="/vso">Find a VSO</a>
-    <a href="/buddy-statement">Buddy Statement</a>
-    <a href="/nexus-letter">Nexus Letter</a>
+    <a href="/rating-calc" style="padding-left:32px; font-size:13px;">Rating Calculator</a>
+    <a href="/pact"        style="padding-left:32px; font-size:13px;">PACT Act Checker</a>
+    <a href="/vso"         style="padding-left:32px; font-size:13px;">Find a VSO</a>
+    <a href="/buddy-statement" style="padding-left:32px; font-size:13px;">Buddy Statement</a>
+    <a href="/nexus-letter"    style="padding-left:32px; font-size:13px;">Nexus Letter</a>
+    <a href="/summary"         style="padding-left:32px; font-size:13px;">Print Summary</a>
     <a href="/settings">Settings</a>
     <a href="/logout">Log Out</a>
   </div>
   <script>
     function toggleNav() {
       document.getElementById('navDrawer').classList.toggle('open');
+      document.getElementById('toolsDropdown').classList.remove('open');
     }
+    function toggleDropdown() {
+      document.getElementById('toolsDropdown').classList.toggle('open');
+    }
+    document.addEventListener('click', function(e) {
+      const dd = document.getElementById('toolsDropdown');
+      if (dd && !dd.contains(e.target)) dd.classList.remove('open');
+    });
   </script>
   {% endif %}
 
