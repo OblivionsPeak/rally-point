@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block title %}Edit Claim — {{ claim.condition }} — Rally Point{% endblock %}
+{% block content %}
+<div style="max-width:540px;">
+  <div class="page-header">
+    <a href="/claims/{{ claim.id }}" style="font-size:13px; color:var(--muted);">← Back to {{ claim.condition }}</a>
+    <h1 style="margin-top:6px;">Edit Claim</h1>
+  </div>
+  <div class="card">
+    <form method="POST" action="/claims/{{ claim.id }}/edit">
+      <div class="form-group">
+        <label class="form-label">Condition / Disability</label>
+        <input type="text" name="condition" class="form-control" value="{{ claim.condition }}" required autofocus>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Claim Type</label>
+        <select name="claim_type" class="form-control">
+          <option value="initial"      {{ 'selected' if claim.claim_type == 'initial' }}>Initial Claim</option>
+          <option value="increase"     {{ 'selected' if claim.claim_type == 'increase' }}>Claim for Increase</option>
+          <option value="secondary"    {{ 'selected' if claim.claim_type == 'secondary' }}>Secondary Condition</option>
+          <option value="supplemental" {{ 'selected' if claim.claim_type == 'supplemental' }}>Supplemental Claim</option>
+          <option value="hlr"          {{ 'selected' if claim.claim_type == 'hlr' }}>Higher-Level Review (HLR)</option>
+          <option value="bva"          {{ 'selected' if claim.claim_type == 'bva' }}>Board Appeal (BVA)</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Date Filed <span style="color:var(--muted)">(optional)</span></label>
+        <input type="date" name="date_filed" class="form-control" value="{{ claim.date_filed or '' }}">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Notes <span style="color:var(--muted)">(optional)</span></label>
+        <textarea name="notes" class="form-control">{{ claim.notes or '' }}</textarea>
+      </div>
+      <div style="display:flex; gap:10px;">
+        <button type="submit" class="btn btn-primary">Save Changes</button>
+        <a href="/claims/{{ claim.id }}" class="btn btn-secondary">Cancel</a>
+      </div>
+    </form>
+  </div>
+
+  <!-- Danger zone -->
+  <div class="card" style="margin-top:20px; border-color:var(--danger);">
+    <div style="font-size:14px; font-weight:600; color:var(--danger); margin-bottom:8px;">Delete Claim</div>
+    <p style="font-size:13px; color:var(--muted); margin-bottom:14px;">
+      Permanently deletes this claim along with its timeline, evidence checklist, journal notes, and all related data. This cannot be undone.
+    </p>
+    <form method="POST" action="/claims/{{ claim.id }}/delete" onsubmit="return confirm('Delete {{ claim.condition }}? This cannot be undone.');">
+      <button type="submit" class="btn" style="background:var(--danger); color:#fff;">Delete This Claim</button>
+    </form>
+  </div>
+</div>
+{% endblock %}

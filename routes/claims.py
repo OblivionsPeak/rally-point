@@ -114,6 +114,39 @@ def toggle_doc(claim_id, doc_id):
     return redirect(url_for('claims.view_claim', claim_id=claim_id))
 
 
+@bp.get('/claims/<claim_id>/edit')
+@login_required
+def edit_claim(claim_id):
+    user_id = session['user']['id']
+    claim   = svc_client.table('claims').select('*').eq('id', claim_id).eq('user_id', user_id).maybe_single().execute()
+    if not claim.data:
+        return redirect(url_for('dashboard.home'))
+    return render_template('claim_edit.html', claim=claim.data)
+
+
+@bp.post('/claims/<claim_id>/edit')
+@login_required
+def save_claim(claim_id):
+    user_id = session['user']['id']
+    svc_client.table('claims').update({
+        'condition':  request.form.get('condition', '').strip(),
+        'claim_type': request.form.get('claim_type', 'initial'),
+        'date_filed': request.form.get('date_filed') or None,
+        'notes':      request.form.get('notes', '').strip(),
+    }).eq('id', claim_id).eq('user_id', user_id).execute()
+    flash('Claim updated.', 'success')
+    return redirect(url_for('claims.view_claim', claim_id=claim_id))
+
+
+@bp.post('/claims/<claim_id>/delete')
+@login_required
+def delete_claim(claim_id):
+    user_id = session['user']['id']
+    svc_client.table('claims').delete().eq('id', claim_id).eq('user_id', user_id).execute()
+    flash('Claim deleted.', 'success')
+    return redirect(url_for('dashboard.home'))
+
+
 @bp.post('/claims/<claim_id>/appeal')
 @login_required
 def update_appeal(claim_id):
