@@ -1,0 +1,209 @@
+{% extends "base.html" %}
+{% block title %}TDIU Guide — Rally Point{% endblock %}
+{% block content %}
+
+<div style="max-width:820px; margin:0 auto;">
+
+  <a href="/dashboard" style="font-size:13px; color:var(--muted);">← Back to Dashboard</a>
+  <h1 style="font-size:26px; font-weight:700; margin-top:8px; margin-bottom:4px;">Total Disability Based on Individual Unemployability (TDIU)</h1>
+  <p style="font-size:14px; color:var(--muted); margin-bottom:28px;">
+    TDIU allows veterans to receive <strong style="color:var(--text);">100% disability pay</strong> even if their combined rating is below 100%, when service-connected conditions prevent them from maintaining substantially gainful employment.
+  </p>
+
+  <!-- Key stat banner -->
+  <div style="background:linear-gradient(135deg,#1a2d4a,#1a3a2a); border:1px solid #2d4a6b; border-radius:10px; padding:20px 24px; margin-bottom:28px; display:flex; flex-wrap:wrap; gap:24px; align-items:center;">
+    <div style="text-align:center;">
+      <div style="font-size:36px; font-weight:800; color:#3fb950;">100%</div>
+      <div style="font-size:12px; color:var(--muted); margin-top:2px;">Pay rate with TDIU</div>
+    </div>
+    <div style="width:1px; height:48px; background:var(--border);"></div>
+    <div style="flex:1; min-width:200px;">
+      <div style="font-size:14px; font-weight:600; margin-bottom:4px;">What this means in dollars</div>
+      <div style="font-size:13px; color:var(--muted); line-height:1.7;">
+        A veteran rated 70% receives roughly <strong style="color:var(--text);">$1,716/month</strong>. With TDIU, that same veteran receives the 100% rate of <strong style="color:var(--text);">$3,737/month</strong> — a difference of over $2,000/month and $24,000/year.
+        <br><span style="font-size:11px; opacity:0.7;">(2024 rates, single veteran with no dependents)</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Eligibility checker -->
+  <div class="card" style="margin-bottom:20px; border-color:var(--accent);">
+    <div class="card-title" style="color:var(--accent);">Quick Eligibility Check</div>
+    <p style="font-size:13px; color:var(--muted); margin-bottom:18px;">Answer these two questions to see if you may qualify for TDIU.</p>
+
+    <div style="display:flex; flex-direction:column; gap:16px;" id="checkerForm">
+
+      <div style="background:var(--bg); border:1px solid var(--border); border-radius:8px; padding:16px;">
+        <div style="font-size:14px; font-weight:600; margin-bottom:12px;">1. What are your current service-connected ratings?</div>
+        <div style="display:flex; flex-direction:column; gap:8px;">
+          <label style="display:flex; align-items:center; gap:10px; font-size:13px; cursor:pointer;">
+            <input type="radio" name="ratings" value="single60" onchange="updateEligibility()">
+            I have at least one condition rated <strong>60% or higher</strong>
+          </label>
+          <label style="display:flex; align-items:center; gap:10px; font-size:13px; cursor:pointer;">
+            <input type="radio" name="ratings" value="combo70" onchange="updateEligibility()">
+            My combined rating is <strong>70% or higher</strong> and at least one condition is rated <strong>40% or higher</strong>
+          </label>
+          <label style="display:flex; align-items:center; gap:10px; font-size:13px; cursor:pointer;">
+            <input type="radio" name="ratings" value="below" onchange="updateEligibility()">
+            Neither of the above (combined rating below 70%, or no single condition at 40%+)
+          </label>
+        </div>
+      </div>
+
+      <div style="background:var(--bg); border:1px solid var(--border); border-radius:8px; padding:16px;">
+        <div style="font-size:14px; font-weight:600; margin-bottom:12px;">2. Are you unable to work due to your service-connected conditions?</div>
+        <div style="display:flex; flex-direction:column; gap:8px;">
+          <label style="display:flex; align-items:center; gap:10px; font-size:13px; cursor:pointer;">
+            <input type="radio" name="unemployable" value="yes" onchange="updateEligibility()">
+            Yes — my service-connected conditions prevent me from maintaining substantially gainful employment
+          </label>
+          <label style="display:flex; align-items:center; gap:10px; font-size:13px; cursor:pointer;">
+            <input type="radio" name="unemployable" value="marginal" onchange="updateEligibility()">
+            I work, but only in a sheltered environment or earn below the federal poverty level
+          </label>
+          <label style="display:flex; align-items:center; gap:10px; font-size:13px; cursor:pointer;">
+            <input type="radio" name="unemployable" value="no" onchange="updateEligibility()">
+            No — I am currently employed at a competitive wage
+          </label>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Result -->
+    <div id="eligibilityResult" style="display:none; margin-top:18px; border-radius:8px; padding:16px 18px;"></div>
+  </div>
+
+  <!-- Two paths -->
+  <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:24px;">
+    <div class="card">
+      <div style="font-size:13px; font-weight:700; text-transform:uppercase; letter-spacing:0.5px; color:var(--accent); margin-bottom:10px;">Schedular TDIU</div>
+      <div style="font-size:13px; color:var(--muted); line-height:1.8;">
+        The standard path. You meet the rating thresholds and are unable to work. VA Form 21-8940 is required.<br><br>
+        <strong style="color:var(--text);">Criteria:</strong>
+        <ul style="margin:8px 0 0; padding-left:18px; line-height:2;">
+          <li>One condition rated <strong>60%+</strong>, OR</li>
+          <li>Combined rating <strong>70%+</strong> with at least one condition at <strong>40%+</strong></li>
+          <li>Unable to maintain substantially gainful employment</li>
+        </ul>
+      </div>
+    </div>
+    <div class="card">
+      <div style="font-size:13px; font-weight:700; text-transform:uppercase; letter-spacing:0.5px; color:#d29922; margin-bottom:10px;">Extra-Schedular TDIU</div>
+      <div style="font-size:13px; color:var(--muted); line-height:1.8;">
+        For veterans who don't meet the rating thresholds but are still unable to work due to their service-connected conditions.<br><br>
+        <strong style="color:var(--text);">How it works:</strong>
+        <ul style="margin:8px 0 0; padding-left:18px; line-height:2;">
+          <li>VA must refer to the Director of Compensation</li>
+          <li>Harder to obtain — requires strong medical and vocational evidence</li>
+          <li>Always worth pursuing if you're truly unemployable</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- How to apply -->
+  <div class="card" style="margin-bottom:20px;">
+    <div class="card-title">How to Apply</div>
+
+    <div style="display:flex; flex-direction:column; gap:0;">
+      {% for step in [
+        ('1', 'Complete VA Form 21-8940', 'The Application for Increased Compensation Based on Unemployability. This is the primary TDIU application form. List all employers from the past 5 years, including dates of last employment.'),
+        ('2', 'Have your employers complete VA Form 21-4192', 'Request for Employment Information. Ask your last employer(s) to fill this out — it documents your work history and any accommodations you required. VA sends this directly to employers, but you can also submit it yourself.'),
+        ('3', 'Gather medical evidence connecting your conditions to unemployability', 'Your doctor(s) should document specifically how your service-connected conditions prevent you from working. Generic statements are not enough — the nexus to unemployability must be explicit.'),
+        ('4', 'Include Social Security records if applicable', 'If you receive SSDI, include your Social Security award letter. SSDI approval is strong supporting evidence for TDIU, though not required.'),
+        ('5', 'Submit to VA or work with your VSO', 'File through VA.gov, a regional office, or — strongly recommended — work with a VSO who can review your package before submission.')
+      ] %}
+      <div style="display:flex; gap:16px; padding:16px 0; border-bottom:1px solid var(--border);">
+        <div style="width:28px; height:28px; border-radius:50%; background:var(--accent); color:#fff; font-weight:700; font-size:13px; display:flex; align-items:center; justify-content:center; flex-shrink:0; margin-top:1px;">{{ step[0] }}</div>
+        <div>
+          <div style="font-weight:600; font-size:14px; margin-bottom:4px;">{{ step[1] }}</div>
+          <div style="font-size:13px; color:var(--muted); line-height:1.6;">{{ step[2] }}</div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- Key concepts -->
+  <div class="card" style="margin-bottom:20px;">
+    <div class="card-title">Key Concepts</div>
+    <div style="display:flex; flex-direction:column; gap:0;">
+      {% for item in [
+        ('Substantially Gainful Employment', 'Work that pays above the federal poverty level in a competitive (non-sheltered) work environment. Part-time work above poverty level may still disqualify you — VA looks at the nature of the work and whether a non-disabled person could hold the same job.'),
+        ('Marginal Employment', 'If you work in a sheltered environment (e.g. a family business that accommodates your limitations) or earn below the federal poverty level, VA may still find you unemployable for TDIU purposes.'),
+        ('Protected Income Rule', 'Once granted TDIU, you can work in a "marginal" capacity without losing it. But if you return to substantially gainful employment, VA may propose to reduce or terminate your TDIU.'),
+        ('TDIU + P&T (Permanent and Total)', 'If VA grants TDIU as permanent, you receive a "Permanent and Total" (P&T) designation. This protects you from future rating reductions, makes your dependents eligible for DEA education benefits, and makes your spouse eligible for DIC benefits upon your death.'),
+        ('Age Does Not Disqualify You', 'Retired veterans can still receive TDIU. VA cannot deny TDIU solely because you have reached retirement age — your inability to work must be due to your service-connected conditions, regardless of age.'),
+        ('TDIU and Social Security', 'TDIU does not affect your Social Security retirement or SSDI benefits. You can receive both simultaneously. SSDI receipt can actually strengthen a TDIU claim.')
+      ] %}
+      <div style="padding:14px 0; border-bottom:1px solid var(--border);">
+        <div style="font-weight:600; font-size:14px; margin-bottom:4px;">{{ item[0] }}</div>
+        <div style="font-size:13px; color:var(--muted); line-height:1.6;">{{ item[1] }}</div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- Evidence tips -->
+  <div class="card" style="margin-bottom:20px;">
+    <div class="card-title">Evidence That Strengthens a TDIU Claim</div>
+    <ul style="font-size:14px; color:var(--muted); line-height:2.2; padding-left:20px; margin:0;">
+      <li><strong style="color:var(--text);">Nexus letter specifically addressing employability</strong> — your doctor stating that your service-connected conditions prevent you from maintaining substantially gainful employment</li>
+      <li><strong style="color:var(--text);">Work history showing progressive decline</strong> — job loss, frequent absences, demotions, or accommodations related to your condition</li>
+      <li><strong style="color:var(--text);">Social Security Disability Insurance (SSDI) award</strong> — not required but very persuasive</li>
+      <li><strong style="color:var(--text);">Vocational expert opinion</strong> — a formal assessment stating you are not competitively employable given your conditions, education, and work history</li>
+      <li><strong style="color:var(--text);">Buddy statements from former supervisors or coworkers</strong> — documenting how your conditions affected your work performance</li>
+      <li><strong style="color:var(--text);">Private DBQ showing functional limitations</strong> — the functional impairment section of the DBQ should document how your condition prevents sustained work activity</li>
+    </ul>
+  </div>
+
+  <!-- CTA -->
+  <div style="background:#0d2d1a; border:1px solid #1a5c2a; border-radius:8px; padding:18px 20px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
+    <div>
+      <div style="font-weight:600; font-size:15px; color:#3fb950; margin-bottom:4px;">Ready to apply? Work with a VSO first.</div>
+      <div style="font-size:13px; color:var(--muted);">A VSO will review your ratings, employment history, and medical evidence before you file — for free. TDIU denials are common; a well-prepared application is critical.</div>
+    </div>
+    <a href="/vso" class="btn btn-secondary" style="white-space:nowrap; flex-shrink:0;">Find a VSO</a>
+  </div>
+
+</div>
+
+<script>
+function updateEligibility() {
+  const ratings       = document.querySelector('input[name="ratings"]:checked');
+  const unemployable  = document.querySelector('input[name="unemployable"]:checked');
+  const resultEl      = document.getElementById('eligibilityResult');
+
+  if (!ratings || !unemployable) { resultEl.style.display = 'none'; return; }
+
+  const r = ratings.value;
+  const u = unemployable.value;
+
+  let bg, border, html;
+
+  if (u === 'no') {
+    bg = '#2d2009'; border = '#6e4b0f';
+    html = `<div style="font-weight:700; color:#d29922; margin-bottom:6px;">You may not currently qualify for TDIU</div>
+            <div style="font-size:13px; color:var(--muted); line-height:1.7;">TDIU requires that service-connected conditions prevent substantially gainful employment. If you are currently employed at a competitive wage, you generally will not qualify — unless you are working under significant accommodations that would not be available in a normal work environment.</div>`;
+  } else if ((r === 'single60' || r === 'combo70') && (u === 'yes' || u === 'marginal')) {
+    bg = '#0d2d1a'; border = '#1a5c2a';
+    html = `<div style="font-weight:700; color:#3fb950; margin-bottom:6px;">You may qualify for Schedular TDIU</div>
+            <div style="font-size:13px; color:var(--muted); line-height:1.7;">You appear to meet the rating thresholds and inability-to-work requirement for standard (schedular) TDIU. <strong style="color:var(--text);">Next step:</strong> complete VA Form 21-8940 and gather medical evidence documenting how your service-connected conditions prevent employment. Working with a VSO before filing is strongly recommended.</div>`;
+  } else if (r === 'below' && (u === 'yes' || u === 'marginal')) {
+    bg = '#2d2009'; border = '#6e4b0f';
+    html = `<div style="font-weight:700; color:#d29922; margin-bottom:6px;">You may qualify for Extra-Schedular TDIU</div>
+            <div style="font-size:13px; color:var(--muted); line-height:1.7;">You don't meet the standard rating thresholds, but if your service-connected conditions genuinely prevent employment, you may qualify for extra-schedular TDIU. This path is harder — VA must refer the case to the Director of Compensation. You'll need strong medical evidence and ideally a vocational expert opinion. <strong style="color:var(--text);">Discuss this with a VSO before filing.</strong></div>`;
+  }
+
+  resultEl.style.background  = bg;
+  resultEl.style.border      = `1px solid ${border}`;
+  resultEl.style.borderRadius = '8px';
+  resultEl.style.padding     = '16px 18px';
+  resultEl.innerHTML         = html;
+  resultEl.style.display     = 'block';
+}
+</script>
+
+{% endblock %}

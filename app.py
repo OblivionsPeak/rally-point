@@ -25,6 +25,7 @@ from routes.buddy       import bp as buddy_bp
 from routes.nexus       import bp as nexus_bp
 from routes.summary     import bp as summary_bp
 from routes.dbq         import bp as dbq_bp
+from routes.tdiu        import bp as tdiu_bp
 
 app.register_blueprint(auth_bp)
 app.register_blueprint(dashboard_bp)
@@ -39,6 +40,7 @@ app.register_blueprint(buddy_bp)
 app.register_blueprint(nexus_bp)
 app.register_blueprint(summary_bp)
 app.register_blueprint(dbq_bp)
+app.register_blueprint(tdiu_bp)
 
 # ── Background scheduler ───────────────────────────────────────────────────────
 from reminders.scheduler import start_reminder_scheduler
